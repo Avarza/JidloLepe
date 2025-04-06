@@ -4,7 +4,7 @@ import React from 'react'
 const Scan = () => {
     return(
         <View>
-            <Text>Profile</Text>
+            <Text>Scan</Text>
         </View>
     )
 }
