@@ -24,7 +24,7 @@ const _Layout = () => {
 
         setIsAnimating(true);
         Animated.spring(scale, {
-            toValue: 0.7,  // Scales down to 70%
+            toValue: 0.7,
             useNativeDriver: true,
         }).start(() => {
             setIsAnimating(false);
@@ -85,6 +85,12 @@ const _Layout = () => {
                 options={{
                     tabBarIcon: (props: TabBarIconProps) =>
                         renderTabBarIcon(icons.search, icons.search_active, props)
+                }}
+            />
+            <Tabs.Screen
+                name="product-details"
+                options={{
+                    href: null, // Tato stránka nebude v tab navigaci
                 }}
             />
             <Tabs.Screen
