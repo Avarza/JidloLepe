@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { useRouter } from 'expo-router';
+import colors from "@/tailwind.config";
 
 const ScanScreen = () => {
     const [permission, requestPermission] = useCameraPermissions();
@@ -30,7 +31,9 @@ const ScanScreen = () => {
         return (
             <View style={styles.container}>
                 <Text>Nemáte přístup ke kameře</Text>
-                <Button title="Povolit přístup ke kameře" onPress={requestPermission} />
+                <TouchableOpacity onPress={requestPermission} style={styles.button}>
+                    <Text style={styles.buttonText}>Povolit přístup ke kameře</Text>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -42,12 +45,14 @@ const ScanScreen = () => {
                 facing={facing}
                 onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
                 barcodeScannerSettings={{
-                    barcodeTypes: ['ean13', 'qr', 'code128', 'upc_a', 'upc_e'],
+                    barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'qr'],
                 }}
             />
             {scanned && (
                 <View style={styles.overlay}>
-                    <Button title="Skenovat znovu" onPress={() => setScanned(false)} />
+                    <TouchableOpacity onPress={() => setScanned(false)} style={styles.button}>
+                        <Text style={styles.buttonText}>Skenovat znovu</Text>
+                    </TouchableOpacity>
                 </View>
             )}
         </View>
@@ -65,10 +70,21 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: colors.primary,
         padding: 20,
         alignItems: 'center',
     },
+    button: {
+        backgroundColor: colors.primary, // změň barvu pozadí na požadovanou
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    buttonText: {
+        color: 'white', // změň barvu textu na požadovanou
+        fontSize: 16,
+        fontWeight: 'bold',
+    }
 });
 
 export default ScanScreen;

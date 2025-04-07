@@ -87,12 +87,7 @@ const _Layout = () => {
                         renderTabBarIcon(icons.search, icons.search_active, props)
                 }}
             />
-            <Tabs.Screen
-                name="product-details"
-                options={{
-                    href: null, // Tato stránka nebude v tab navigaci
-                }}
-            />
+
             <Tabs.Screen
                 name="scan"
                 options={{
