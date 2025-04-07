@@ -7,7 +7,14 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční scan" />
+    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční scan a odkaz na [id]">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/product-details.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/scan.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/scan.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Product/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/Product/[id].tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -132,7 +139,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744018410872</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="funkční scan">
+      <option name="closed" value="true" />
+      <created>1744018593958</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1744018593958</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -141,6 +156,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init" />
     <MESSAGE value="funkční scan" />
-    <option name="LAST_COMMIT_MESSAGE" value="funkční scan" />
+    <MESSAGE value="funkční scan a odkaz na [id]" />
+    <option name="LAST_COMMIT_MESSAGE" value="funkční scan a odkaz na [id]" />
   </component>
 </project>

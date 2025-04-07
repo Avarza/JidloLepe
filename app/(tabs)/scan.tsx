@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
+import { useRouter } from 'expo-router';
 
 const ScanScreen = () => {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [facing, setFacing] = useState<'front' | 'back'>('back');
+    const router = useRouter();
 
     const handleBarCodeScanned = (result: BarcodeScanningResult) => {
-        if (!scanned) {
+        if (!scanned && result?.data) {
             setScanned(true);
-            console.log('Naskenovaný kód:', result?.data);
-            // můžeš přidat navigaci nebo zpracování dat
+            const productId = result.data;
+
+            // ⏩ přesměrování na detail produktu
+            router.push({
+                pathname: '/Product/[id]',
+                params: { id: productId }
+            });
         }
     };
 

@@ -1,11 +1,13 @@
-import {View, Text} from 'react-native'
-import React from 'react'
+import { useLocalSearchParams } from 'expo-router';
+import { Text, View } from 'react-native';
 
-const Detail = () => {
-    return(
+export default function ProductDetail() {
+    const { id } = useLocalSearchParams();
+
+    return (
         <View>
-            <Text>[id]</Text>
+            <Text>Detail produktu pro ID: {id}</Text>
+            {/* tady můžeš načíst data podle id */}
         </View>
-    )
+    );
 }
-export default Detail
