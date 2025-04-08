@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useLocalSearchParams } from 'expo-router';
-import { Text, View, Image, ScrollView, StyleSheet } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Text, View, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';  // Ikona šipky zpět
 
 // Typ pro data produktu
 interface ProductData {
@@ -11,6 +12,7 @@ interface ProductData {
 
 export default function ProductDetail() {
     const { id } = useLocalSearchParams();
+    const router = useRouter();
     const [productData, setProductData] = useState<ProductData | null>(null);
 
     useEffect(() => {
@@ -43,6 +45,14 @@ export default function ProductDetail() {
 
     return (
         <ScrollView style={styles.container}>
+            {/* Tlačítko pro návrat */}
+            <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.push('/')}  // Návrat na hlavní obrazovku
+            >
+                <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+
             <Text style={styles.productTitle}>{productData.product_name}</Text>
             {productData.image_url && (
                 <Image
@@ -76,5 +86,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 20,
+    },
+    backButton: {
+   display:"flex",
+        justifyContent:"flex-start",
     },
 });

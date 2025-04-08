@@ -1,25 +1,63 @@
-import {Image, ScrollView,Text, View } from "react-native";
-import {images} from "@/constants/images";
-import icons from "@/constants/icons";
+import { Text, View, ScrollView, Image, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import SearchBar from "@/components/searchBar";
-import {useRouter} from "expo-router";
+import icons from "@/constants/icons";
 
 
-export default function Index() {
+interface Product {
+    code: string;
+    product_name: string;
+    image_front_url?: string;
+}
+
+export default function Home() {
     const router = useRouter();
+    const [products, setProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch('https://world.openfoodfacts.org/cgi/search.pl?action=process&tagtype_0=categories&tag_contains_0=contains&tag_0=snacks&page_size=5&json=true');
+                const data = await response.json();
+                setProducts(data.products);
+                console.log("Načtené produkty:", data.products);
+            } catch (error) {
+                console.error('Chyba při načítání produktů:', error);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     return (
-    <View className="flex-1 bg-accent">
-        {/*<Image source={images.jumbotron} className="absolute w-full z-0" />*/}
-        <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false} contentContainerStyle={
-            {minHeight:"100%", paddingBottom:10}} >
-                <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
-                <View className=" flex-1 mt-5">
-                    <SearchBar onPress={()=> router.push("/(tabs)/search")}
-                               placeholder="Hledej alergeny"
-                    /></View>
-            </ScrollView>
+        <ScrollView className="flex-1 px-4 pt-10 bg-accent">
+            <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
 
-    </View>
-  );
+            <SearchBar onPress={()=> router.push("/(tabs)/search")}
+                       placeholder="Hledej produkty!"
+            />
+            {products.map((product) => {
+                if (!product.code) return null;
+
+                return (
+                    <Pressable
+                        key={product.code}
+                        onPress={() => router.push({ pathname: '/Product/[id]', params: { id: product.code } })}
+                    >
+                        <View className="mb-5 bg-white p-3 rounded-2xl accent-primary">
+                            {product.image_front_url && (
+                                <Image
+                                    source={{ uri: product.image_front_url }}
+                                    className="w-full h-48 rounded-xl mb-2"
+                                    resizeMode="cover"
+                                />
+                            )}
+                            <Text className="text-lg font-semibold">{product.product_name || 'Bez názvu'}</Text>
+                        </View>
+                    </Pressable>
+                );
+            })}
+        </ScrollView>
+    );
 }

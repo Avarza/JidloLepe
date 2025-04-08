@@ -1,4 +1,4 @@
-import {View, Text, Image, TextInput} from 'react-native'
+import { View, TextInput, Image, Pressable, StyleSheet } from 'react-native';
 import icons from "@/constants/icons";
 
 interface Props {
@@ -6,17 +6,42 @@ interface Props {
     onPress?: () => void;
 }
 
-const SearchBar  = ({placeholder, onPress}: Props) => {
+const SearchBar = ({ placeholder, onPress }: Props) => {
     return (
-        <View className="flex-row items-center bg-dark-200 rounded-full px-5 py-4">
-<Image source={icons.search} className="size-5" resizeMode="contain"/>
-<TextInput onPress={onPress}
-           placeholder={placeholder}
-           value=""
-           onChangeText={()=> {}}
-           placeholderTextColor="white"
-           className="flex-1 ml-2 text-white"/>
-</View>
-    )
-}
-export default SearchBar
+        <Pressable onPress={onPress}>
+            <View style={styles.container}>
+                <Image source={icons.search} style={styles.icon} resizeMode="contain" />
+                <TextInput
+                    placeholder={placeholder}
+                    placeholderTextColor="white"
+                    editable={false}
+                    pointerEvents="none"
+                    style={styles.input}
+                />
+            </View>
+        </Pressable>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: "color.primary",
+        borderRadius: 999,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+    },
+    icon: {
+        width: 20,
+        height: 20,
+    },
+    input: {
+        flex: 1,
+        marginLeft: 10,
+        color: 'white',
+        fontSize: 16,
+    },
+});
+
+export default SearchBar;
