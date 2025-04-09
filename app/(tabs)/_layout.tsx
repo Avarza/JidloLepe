@@ -1,9 +1,9 @@
 import { View, TouchableOpacity, Image, Animated } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments, Tabs } from "expo-router";
 import { icons } from "@/constants/icons";
-import { Tabs } from "expo-router";
 import colors from "tailwindcss/colors";
+import { AuthProvider } from "@/context/authContext";
 
 type TabBarIconProps = {
     focused: boolean;
@@ -11,7 +11,7 @@ type TabBarIconProps = {
     size: number;
 };
 
-const _Layout = () => {
+const LayoutContent = () => {
     const router = useRouter();
     const segments = useSegments();
     const [scale] = useState(new Animated.Value(1));
@@ -34,7 +34,6 @@ const _Layout = () => {
         });
     };
 
-    // Reset scale when leaving scan page
     useEffect(() => {
         if (!isScanPage) {
             Animated.spring(scale, {
@@ -87,7 +86,6 @@ const _Layout = () => {
                         renderTabBarIcon(icons.search, icons.search_active, props)
                 }}
             />
-
             <Tabs.Screen
                 name="scan"
                 options={{
@@ -133,6 +131,15 @@ const _Layout = () => {
                 }}
             />
         </Tabs>
+    );
+};
+
+// Wrapping the layout in the AuthProvider
+const _Layout = () => {
+    return (
+        <AuthProvider>
+            <LayoutContent />
+        </AuthProvider>
     );
 };
 

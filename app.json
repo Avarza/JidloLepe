@@ -15,7 +15,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/Logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +40,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c7aed03c-2016-47d2-8555-9267d6664042"
+      }
     }
   }
 }

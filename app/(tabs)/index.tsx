@@ -50,7 +50,7 @@ export default function Home() {
                                 <Image
                                     source={{ uri: product.image_front_url }}
                                     className="w-full h-48 rounded-xl mb-2"
-                                    resizeMode="cover"
+                                    resizeMode="contain"
                                 />
                             )}
                             <Text className="text-lg font-semibold">{product.product_name || 'Bez názvu'}</Text>
