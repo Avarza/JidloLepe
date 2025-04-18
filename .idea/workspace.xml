@@ -7,19 +7,16 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční scan a odkaz na [id]">
-      <change afterPath="$PROJECT_DIR$/components/GoogleLoginButton.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/constants/firebaseConfig.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/context/authContext.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/eas.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/firebase.ts" afterDir="false" />
+    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="přihlášení s google, nevím jestli funguje protože googleconsole">
+      <change afterPath="$PROJECT_DIR$/components/AlergiesForm.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/firestore.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants/firebaseConfig.ts" beforeDir="false" afterPath="$PROJECT_DIR$/constants/firebaseConfig.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/firebase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/firebase.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,6 +117,7 @@
       <workItem from="1743853035339" duration="218000" />
       <workItem from="1743853268022" duration="247000" />
       <workItem from="1743853533553" duration="15733000" />
+      <workItem from="1744993741446" duration="687000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -153,7 +151,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744018593958</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="přihlášení s google, nevím jestli funguje protože googleconsole">
+      <option name="closed" value="true" />
+      <created>1744215644942</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1744215644942</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -163,6 +169,7 @@
     <MESSAGE value="init" />
     <MESSAGE value="funkční scan" />
     <MESSAGE value="funkční scan a odkaz na [id]" />
-    <option name="LAST_COMMIT_MESSAGE" value="funkční scan a odkaz na [id]" />
+    <MESSAGE value="přihlášení s google, nevím jestli funguje protože googleconsole" />
+    <option name="LAST_COMMIT_MESSAGE" value="přihlášení s google, nevím jestli funguje protože googleconsole" />
   </component>
 </project>
