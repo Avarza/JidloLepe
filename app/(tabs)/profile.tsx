@@ -1,52 +1,146 @@
-import { View, Text, Image, Button } from "react-native";
-import React, { useEffect, useState } from "react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import GoogleLoginButton from "@/components/GoogleLoginButton";
+import React, { useState } from 'react';
+import {
+    View,
+    Text,
+    Image,
+    Button,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
-const Profile = () => {
-    const [user, setUser] = useState<User | null>(null);
+// Definice typu pro produkt
+type Product = {
+    image: string;
+    name: string;
+};
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            setUser(firebaseUser);
-        });
+const ProfileScreen = () => {
+    const router = useRouter();
+    const [backgroundImage, setBackgroundImage] = useState('https://example.com/background.jpg');
+    const [avatarImage, setAvatarImage] = useState('https://example.com/avatar.jpg');
+    // Typ pro recentProducts je nyní pole typu Product
+    const [recentProducts, setRecentProducts] = useState<Product[]>([]);
 
-        return unsubscribe;
-    }, []);
-
-    const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            alert("Odhlášen!");
-        } catch (error) {
-            console.error("Chyba při odhlašování:", error);
+    const pickImage = async (setter: (uri: string) => void) => {
+        const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images });
+        if (!result.canceled && result.assets.length > 0) {
+            setter(result.assets[0].uri);
         }
     };
 
-    if (!user) {
-        return (
-            <View className="flex-1 justify-center items-center bg-[#F5F5F5]">
-                <Text className="text-lg mb-4">Nejste přihlášen(a)</Text>
-                <GoogleLoginButton />
-            </View>
-        );
-    }
+    const handleLogout = async () => {
+        await signOut(auth);
+        router.replace('/AuthScreen');
+    };
 
     return (
-        <View className="flex-1 justify-center items-center bg-[#F5F5F5]">
-            <Image
-                source={{ uri: user.photoURL || "" }}
-                style={{ width: 80, height: 80, borderRadius: 40 }}
-            />
-            <Text className="text-xl font-bold mt-4">{user.displayName}</Text>
-            <Text className="text-sm text-gray-600">{user.email}</Text>
+        <ScrollView style={styles.container}>
+            <View style={styles.header}>
+                <Image source={{ uri: backgroundImage }} style={styles.background} />
+                <TouchableOpacity
+                    style={styles.avatarWrapper}
+                    onPress={() => pickImage(setAvatarImage)}
+                >
+                    <Image source={{ uri: avatarImage }} style={styles.avatar} />
+                </TouchableOpacity>
+            </View>
 
-            <View className="mt-6">
+            <View style={styles.buttonsRow}>
+                <Button title="Změnit heslo" onPress={() => router.push('/')} />
+                <Button title="Nahrát profilovku" onPress={() => pickImage(setAvatarImage)} />
                 <Button title="Odhlásit se" onPress={handleLogout} />
             </View>
-        </View>
+
+            <Text style={styles.sectionTitle}>Naposledy prohlížené</Text>
+            <View style={styles.historyContainer}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {recentProducts.map((product, index) => (
+                        <View key={index} style={styles.productCard}>
+                            <Image source={{ uri: product.image }} style={styles.productImage} />
+                            <Text>{product.name}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
+                <TouchableOpacity onPress={() => {}}>
+                    <Ionicons name="arrow-forward-circle" size={30} color="gray" />
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.extraButtons}>
+                <Button title="Moje alergeny" onPress={() => router.push('/(tabs)/fav')} />
+                <Button title="Doporučené produkty" onPress={() => router.push('/(tabs)/search')} />
+            </View>
+        </ScrollView>
     );
 };
 
-export default Profile;
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    header: {
+        position: 'relative',
+        height: 200,
+    },
+    background: {
+        width: '100%',
+        height: '100%',
+    },
+    avatarWrapper: {
+        position: 'absolute',
+        bottom: -40,
+        left: '50%',
+        marginLeft: -40,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        overflow: 'hidden',
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
+    avatar: {
+        width: '100%',
+        height: '100%',
+    },
+    buttonsRow: {
+        marginTop: 60,
+        paddingHorizontal: 20,
+        gap: 10,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginHorizontal: 20,
+        marginTop: 20,
+    },
+    historyContainer: {
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    productCard: {
+        width: 100,
+        height: 140,
+        marginRight: 10,
+        alignItems: 'center',
+    },
+    productImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 10,
+    },
+    extraButtons: {
+        paddingHorizontal: 20,
+        marginTop: 20,
+        gap: 10,
+    },
+});
+
+export default ProfileScreen;

@@ -8,15 +8,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="přihlášení s google, nevím jestli funguje protože googleconsole">
-      <change afterPath="$PROJECT_DIR$/components/AlergiesForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/firestore.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/AuthScreen.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/debug/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/java/com/anonymous/JidloLepe/MainActivity.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/java/com/anonymous/JidloLepe/MainApplication.kt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/fav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/fav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/profile.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants/firebaseConfig.ts" beforeDir="false" afterPath="$PROJECT_DIR$/constants/firebaseConfig.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/firebase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/firebase.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,11 +91,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Jituska\Desktop\JidloLepe\app" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets\icons" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets\images" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets" />
-      <recent name="C:\Users\Jituska\Desktop\JidloLepe\app\(tabs)" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -117,7 +121,7 @@
       <workItem from="1743853035339" duration="218000" />
       <workItem from="1743853268022" duration="247000" />
       <workItem from="1743853533553" duration="15733000" />
-      <workItem from="1744993741446" duration="687000" />
+      <workItem from="1744993741446" duration="8760000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -159,7 +163,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744215644942</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="přihlášení s google, nevím jestli funguje protože googleconsole">
+      <option name="closed" value="true" />
+      <created>1744994869788</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1744994869788</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
