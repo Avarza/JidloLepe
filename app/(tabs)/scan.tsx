@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import colors from "@/tailwind.config";
+import colors from '@/tailwind.config';
 
 const ScanScreen = () => {
     const [permission, requestPermission] = useCameraPermissions();
@@ -15,10 +15,9 @@ const ScanScreen = () => {
             setScanned(true);
             const productId = result.data;
 
-            // ⏩ přesměrování na detail produktu
             router.push({
                 pathname: '/Product/[id]',
-                params: { id: productId }
+                params: { id: productId },
             });
         }
     };
@@ -48,6 +47,21 @@ const ScanScreen = () => {
                     barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'qr'],
                 }}
             />
+
+            {/* Bílé rámečky v rozích */}
+            <View style={styles.frameContainer}>
+                <View style={styles.frame}>
+                    {/* Levý horní roh */}
+                    <View style={[styles.corner, styles.topLeft]} />
+                    {/* Pravý horní roh */}
+                    <View style={[styles.corner, styles.topRight]} />
+                    {/* Levý dolní roh */}
+                    <View style={[styles.corner, styles.bottomLeft]} />
+                    {/* Pravý dolní roh */}
+                    <View style={[styles.corner, styles.bottomRight]} />
+                </View>
+            </View>
+
             {scanned && (
                 <View style={styles.overlay}>
                     <TouchableOpacity onPress={() => setScanned(false)} style={styles.button}>
@@ -62,8 +76,48 @@ const ScanScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'column',
         justifyContent: 'center',
+    },
+    frameContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    frame: {
+        width: 260,
+        height: 260,
+        position: 'relative',
+    },
+    corner: {
+        position: 'absolute',
+        width: 40,
+        height: 40,
+        borderColor: 'white',
+        borderWidth: 5,
+    },
+    topLeft: {
+        top: 0,
+        left: 0,
+        borderRightWidth: 0,
+        borderBottomWidth: 0,
+    },
+    topRight: {
+        top: 0,
+        right: 0,
+        borderLeftWidth: 0,
+        borderBottomWidth: 0,
+    },
+    bottomLeft: {
+        bottom: 0,
+        left: 0,
+        borderRightWidth: 0,
+        borderTopWidth: 0,
+    },
+    bottomRight: {
+        bottom: 0,
+        right: 0,
+        borderLeftWidth: 0,
+        borderTopWidth: 0,
     },
     overlay: {
         position: 'absolute',
@@ -75,16 +129,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     button: {
-        backgroundColor: colors.primary, // změň barvu pozadí na požadovanou
+        backgroundColor: colors.primary,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
     },
     buttonText: {
-        color: 'white', // změň barvu textu na požadovanou
+        color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
-    }
+    },
 });
 
 export default ScanScreen;

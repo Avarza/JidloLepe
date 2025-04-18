@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import SearchBar from "@/components/searchBar";
 import icons from "@/constants/icons";
 
-
 interface Product {
     code: string;
     product_name: string;
@@ -14,29 +13,43 @@ interface Product {
 export default function Home() {
     const router = useRouter();
     const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                // Při načítání získáme pouze základní data (kód produktu, název, obrázek)
                 const response = await fetch('https://world.openfoodfacts.org/cgi/search.pl?action=process&tagtype_0=categories&tag_contains_0=contains&tag_0=snacks&page_size=5&json=true');
                 const data = await response.json();
+
+                // Nastavíme produkty
                 setProducts(data.products);
                 console.log("Načtené produkty:", data.products);
             } catch (error) {
                 console.error('Chyba při načítání produktů:', error);
+            } finally {
+                setLoading(false); // Nastavíme loading na false, jakmile jsou data načtena
             }
         };
 
         fetchProducts();
     }, []);
 
+    // Pokud se data stále načítají, zobrazíme indikátor načítání
+    if (loading) {
+        return (
+            <View className="flex-1 justify-center items-center bg-accent">
+                <Text>Načítání produktů...</Text>
+            </View>
+        );
+    }
+
     return (
         <ScrollView className="flex-1 px-4 pt-10 bg-accent">
             <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
 
-            <SearchBar onPress={()=> router.push("/(tabs)/search")}
-                       placeholder="Hledej produkty!"
-            />
+            <SearchBar onPress={() => router.push("/(tabs)/search")} placeholder="Hledej produkty!" />
+
             {products.map((product) => {
                 if (!product.code) return null;
 
