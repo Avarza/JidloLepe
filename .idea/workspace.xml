@@ -7,12 +7,15 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční příhlášení">
+    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční aplikace bez stylování">
+      <change afterPath="$PROJECT_DIR$/assets/data/allergens.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/allergenSelector.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/allergenService.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(tabs)/fav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/fav.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(tabs)/scan.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/scan.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Product/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/Product/[id].tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants/firebaseConfig.ts" beforeDir="false" afterPath="$PROJECT_DIR$/constants/firebaseConfig.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,23 +58,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "ts.external.directory.path": "C:\\Users\\Jituska\\Desktop\\JidloLepe\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Jituska\\Desktop\\JidloLepe\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="ReactDesignerToolWindowState">
     <option name="myId2Visible">
       <map>
@@ -113,7 +116,9 @@
       <workItem from="1743853035339" duration="218000" />
       <workItem from="1743853268022" duration="247000" />
       <workItem from="1743853533553" duration="15733000" />
-      <workItem from="1744993741446" duration="17875000" />
+      <workItem from="1744993741446" duration="19499000" />
+      <workItem from="1745252236850" duration="967000" />
+      <workItem from="1745346025674" duration="2057000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -171,7 +176,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745004410702</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="funkční aplikace bez stylování">
+      <option name="closed" value="true" />
+      <created>1745017186636</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1745017186636</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -183,6 +196,7 @@
     <MESSAGE value="funkční scan a odkaz na [id]" />
     <MESSAGE value="přihlášení s google, nevím jestli funguje protože googleconsole" />
     <MESSAGE value="funkční příhlášení" />
-    <option name="LAST_COMMIT_MESSAGE" value="funkční příhlášení" />
+    <MESSAGE value="funkční aplikace bez stylování" />
+    <option name="LAST_COMMIT_MESSAGE" value="funkční aplikace bez stylování" />
   </component>
 </project>

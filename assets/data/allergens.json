@@ -1,0 +1,62 @@
+[
+  {
+    "cz": "mléko",
+    "translations": ["mléko", "milk", "lait", "milch"]
+  },
+  {
+    "cz": "vejce",
+    "translations": ["vejce", "egg", "oeuf", "ei"]
+  },
+  {
+    "cz": "lepek",
+    "translations": ["lepek", "gluten"]
+  },
+  {
+    "cz": "arašídy",
+    "translations": ["arašídy", "peanut", "arachide", "erdnuss"]
+  },
+  {
+    "cz": "ryby",
+    "translations": ["ryby", "fish", "poisson", "fisch"]
+  },
+  {
+    "cz": "skořápky",
+    "translations": ["skořápky", "shellfish", "crustacés", "schalentiere"]
+  },
+  {
+    "cz": "sója",
+    "translations": ["sója", "soy", "soja", "sojabohne"]
+  },
+  {
+    "cz": "ořechy",
+    "translations": ["ořechy", "nuts", "noix", "nüsse"]
+  },
+  {
+    "cz": "celer",
+    "translations": ["celer", "celery", "céleri"]
+  },
+  {
+    "cz": "hořčice",
+    "translations": ["hořčice", "mustard", "moutarde", "senf"]
+  },
+  {
+    "cz": "sezam",
+    "translations": ["sezam", "sesame", "sésame", "sesam"]
+  },
+  {
+    "cz": "oxid siřičitý",
+    "translations": ["oxid siřičitý", "sulphur dioxide", "dioxyde de soufre"]
+  },
+  {
+    "cz": "vlčí bob",
+    "translations": ["vlčí bob", "lupin", "lupine"]
+  },
+  {
+    "cz": "měkkýši",
+    "translations": ["měkkýši", "molluscs", "mollusques", "weichtiere"]
+  },
+  {
+    "cz": "lískové ořechy",
+    "translations": ["lískové ořechy", "hazelnuts", "noisettes", "haselnüsse"]
+  }
+]

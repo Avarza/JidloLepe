@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, View, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Ikona šipky zpět
-import icons from "@/constants/icons"; // Import tvých vlastních ikon
+import { Ionicons } from '@expo/vector-icons';
+import icons from "@/constants/icons";
+import allergensData from "@/assets/data/allergens.json"; // Importuj JSON lokálně
 
-// Typ pro data produktu
 interface ProductData {
     product_name: string;
     image_url: string;
     ingredients_text: string | null;
+    ingredients_text_cz?: string | null;
+    ingredients_text_en?: string | null;
 }
 
 export default function ProductDetail() {
@@ -16,8 +18,8 @@ export default function ProductDetail() {
     const router = useRouter();
     const [productData, setProductData] = useState<ProductData | null>(null);
     const [hasAllergen, setHasAllergen] = useState<boolean | null>(null);
-    const [userAllergens, setUserAllergens] = useState<string[]>(['gluten', 'lactose']); // Příklad alergenu uživatele
-    const [overlayVisible, setOverlayVisible] = useState(true); // Stavy pro overlay (zobrazení/skrytí)
+    const [userAllergens, setUserAllergens] = useState<string[]>(['mléko', 'lepek']); // české názvy
+    const [overlayVisible, setOverlayVisible] = useState(true);
 
     useEffect(() => {
         const fetchProductData = async () => {
@@ -25,7 +27,6 @@ export default function ProductDetail() {
                 const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${id}.json`);
                 const data = await response.json();
 
-                // Kontrola, zda odpověď obsahuje produkt
                 if (data.product) {
                     setProductData(data.product);
                 }
@@ -39,23 +40,27 @@ export default function ProductDetail() {
         }
     }, [id]);
 
-    // Funkce pro kontrolu alergenů v ingrediencích
     const checkForAllergen = (ingredientsText: string | null) => {
         if (!ingredientsText || userAllergens.length === 0) return;
 
-        const matchingAllergens = userAllergens.filter((allergen) =>
-            ingredientsText.toLowerCase().includes(allergen.toLowerCase())
-        );
+        const lowerIngredients = ingredientsText.toLowerCase();
 
-        if (matchingAllergens.length > 0) {
-            setHasAllergen(true); // Produkt obsahuje alergeny
-        } else {
-            setHasAllergen(false); // Produkt neobsahuje alergeny
-        }
+        // Seznam všech překladů alergenu, které chce uživatel detekovat
+        const translationsToCheck = allergensData
+            .filter((item) => userAllergens.includes(item.cz.toLowerCase()))
+            .flatMap((item) => item.translations.map((tr) => tr.toLowerCase()));
+
+        const found = translationsToCheck.some((term) => lowerIngredients.includes(term));
+        setHasAllergen(found);
     };
 
     useEffect(() => {
-        const ingredients = productData?.ingredients_text || null;
+        const ingredients =
+            productData?.ingredients_text_cz ||
+            productData?.ingredients_text ||
+            productData?.ingredients_text_en ||
+            null;
+
         checkForAllergen(ingredients);
     }, [productData, userAllergens]);
 
@@ -69,27 +74,17 @@ export default function ProductDetail() {
 
     return (
         <View style={styles.container}>
-
-
-            {/* Overlay pro alergen */}
             {overlayVisible && hasAllergen !== null && (
                 <View style={[styles.overlay, { backgroundColor: 'rgba(0, 0, 0, 0.9)' }]}>
-                    <Image
-                        source={hasAllergen ? icons.good : icons.bad}
-                        style={styles.icon}
-                    />
-                    <Text
-                        style={[
-                            styles.overlayText,
-                            { color: hasAllergen ? 'green' : 'red' },
-                        ]}
-                    >
-                        {hasAllergen ? 'Bez alergenů, které jste zadali' : 'Obsahuje alergeny, které jste zadali'}
+                    <Image source={hasAllergen ? icons.bad : icons.good} style={styles.icon} />
+                    <Text style={[styles.overlayText, { color: hasAllergen ? 'red' : 'green' }]}>
+                        {hasAllergen
+                            ? 'Obsahuje alergeny, které jste zadali'
+                            : 'Bez alergenů, které jste zadali'}
                     </Text>
-
                     <TouchableOpacity
                         style={styles.closeButton}
-                        onPress={() => setOverlayVisible(false)} // Zavření overlay
+                        onPress={() => setOverlayVisible(false)}
                     >
                         <Ionicons name="close" size={30} color="white" />
                     </TouchableOpacity>
@@ -97,41 +92,33 @@ export default function ProductDetail() {
             )}
 
             <ScrollView style={styles.productContainer}>
-                {/* Název produktu a šipka pro návrat */}
                 <View style={styles.productHeader}>
                     <Text style={styles.productTitle}>{productData.product_name}</Text>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => router.push('/scan')} // Návrat na skenování
-                    >
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.push('/scan')}>
                         <Ionicons name="arrow-back" size={30} color="black" />
                     </TouchableOpacity>
                 </View>
 
                 {productData.image_url && (
-                    <Image
-                        source={{ uri: productData.image_url }}
-                        style={styles.productImage}
-                    />
+                    <Image source={{ uri: productData.image_url }} style={styles.productImage} />
                 )}
+
                 <Text style={styles.sectionTitle}>Složení:</Text>
-                <Text>{productData.ingredients_text || 'Složení není k dispozici.'}</Text>
+                <Text>
+                    {productData.ingredients_text_cz ||
+                        productData.ingredients_text ||
+                        'Složení není k dispozici.'}
+                </Text>
             </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
+    container: { flex: 1, backgroundColor: '#fff' },
     overlay: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 0, left: 0, right: 0, bottom: 0,
         zIndex: 1,
         justifyContent: 'center',
         alignItems: 'center',
@@ -145,26 +132,17 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
-    backButton: {
-        position: 'absolute',
-        top: 10,
-        left: 10,
-    },
     closeButton: {
         position: 'absolute',
         bottom: 20,
-        margin:"auto",
         transform: [{ translateX: -25 }],
-
     },
     icon: {
         width: 50,
         height: 50,
         marginBottom: 20,
     },
-    productContainer: {
-        padding: 20,
-    },
+    productContainer: { padding: 20 },
     productHeader: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -174,7 +152,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 10,
-        marginRight: 10, // 1rem spacing to the right for arrow
+        marginRight: 10,
+    },
+    backButton: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
     },
     productImage: {
         width: '100%',

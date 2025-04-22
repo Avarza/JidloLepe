@@ -1,34 +1,38 @@
-// /components/AllergenSelector.tsx
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, TouchableOpacity, Alert, Button } from 'react-native';
-import { fetchAllergens, fetchUserAllergens, saveUserAllergens } from '@/services/allergenService';  // Import služeb
+import { fetchAllergens, fetchUserAllergens, saveUserAllergens } from '@/services/allergenService';
 import { getAuth } from 'firebase/auth';
 
 const AllergenSelector = () => {
-    const [allergens, setAllergens] = useState<any>({});
-    const [filteredAllergens, setFilteredAllergens] = useState<any>({});
+    const [allergens, setAllergens] = useState<Record<string, string[]>>({});
+    const [filteredAllergens, setFilteredAllergens] = useState<Record<string, string[]>>({});
     const [searchText, setSearchText] = useState('');
     const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
     const auth = getAuth();
     const user = auth.currentUser;
-    const getErrorMessage = (error: unknown) =>
-        error instanceof Error ? error.message : 'Došlo k neznámé chybě';
+
     useEffect(() => {
         const loadData = async () => {
             try {
-                const allergenData = await fetchAllergens();  // Používáme službu
+                const allergenData = await fetchAllergens();
                 setAllergens(allergenData);
                 setFilteredAllergens(allergenData);
 
                 if (user) {
-                    const userAllergens = await fetchUserAllergens(user.uid);  // Používáme službu
+                    const userAllergens = await fetchUserAllergens(user.uid);
                     setSelectedAllergens(userAllergens);
                 }
-            } catch (error) {
-                Alert.alert('Chyba', getErrorMessage(error));
-                console.error('Error loading allergens:', error);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    Alert.alert('Chyba', error.message); // Pokud je to instance Error, zobrazí se její zpráva
+                    console.error('Error loading allergens:', error.message); // Stejně tak v logu
+                } else {
+                    Alert.alert('Chyba', 'Došlo k neznámé chybě');
+                    console.error('Unknown error:', error);
+                }
             }
         };
+
 
         loadData();
     }, [user]);
@@ -40,7 +44,7 @@ const AllergenSelector = () => {
             return;
         }
 
-        const filtered: any = {};
+        const filtered: Record<string, string[]> = {};
         for (const category in allergens) {
             const filteredCategory = allergens[category].filter((allergen: string) =>
                 allergen.toLowerCase().includes(text.toLowerCase())
@@ -68,11 +72,14 @@ const AllergenSelector = () => {
         }
 
         try {
-            await saveUserAllergens(user.uid, selectedAllergens);  // Používáme službu
+            await saveUserAllergens(user.uid, selectedAllergens);
             Alert.alert('Uloženo', 'Alergeny byly úspěšně uloženy.');
-        } catch (error) {
-            Alert.alert('Chyba', getErrorMessage(error));
-        }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                Alert.alert('Chyba', error.message);
+            } else {
+                Alert.alert('Chyba', 'Došlo k neznámé chybě');
+            }}
     };
 
     const handleResetSelection = () => {

@@ -19,6 +19,8 @@ const ScanScreen = () => {
                 pathname: '/Product/[id]',
                 params: { id: productId },
             });
+            setTimeout(() => setScanned(false), 3000);
+
         }
     };
 
@@ -62,13 +64,7 @@ const ScanScreen = () => {
                 </View>
             </View>
 
-            {scanned && (
-                <View style={styles.overlay}>
-                    <TouchableOpacity onPress={() => setScanned(false)} style={styles.button}>
-                        <Text style={styles.buttonText}>Skenovat znovu</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+
         </View>
     );
 };
