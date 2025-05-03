@@ -7,15 +7,8 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční aplikace bez stylování">
-      <change afterPath="$PROJECT_DIR$/assets/data/allergens.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/allergenSelector.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/allergenService.ts" afterDir="false" />
+    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční aplikace s překladem alergenu, funguje divně">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/fav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/fav.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/scan.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/scan.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Product/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/Product/[id].tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants/firebaseConfig.ts" beforeDir="false" afterPath="$PROJECT_DIR$/constants/firebaseConfig.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +111,8 @@
       <workItem from="1743853533553" duration="15733000" />
       <workItem from="1744993741446" duration="19499000" />
       <workItem from="1745252236850" duration="967000" />
-      <workItem from="1745346025674" duration="2057000" />
+      <workItem from="1745346025674" duration="4730000" />
+      <workItem from="1746162513133" duration="197000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -184,7 +178,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745017186636</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="funkční aplikace s překladem alergenu, funguje divně">
+      <option name="closed" value="true" />
+      <created>1745348405223</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1745348405223</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -197,6 +199,7 @@
     <MESSAGE value="přihlášení s google, nevím jestli funguje protože googleconsole" />
     <MESSAGE value="funkční příhlášení" />
     <MESSAGE value="funkční aplikace bez stylování" />
-    <option name="LAST_COMMIT_MESSAGE" value="funkční aplikace bez stylování" />
+    <MESSAGE value="funkční aplikace s překladem alergenu, funguje divně" />
+    <option name="LAST_COMMIT_MESSAGE" value="funkční aplikace s překladem alergenu, funguje divně" />
   </component>
 </project>
