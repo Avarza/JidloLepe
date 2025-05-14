@@ -8,7 +8,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="funkční aplikace s překladem alergenu, funguje divně">
+      <change afterPath="$PROJECT_DIR$/DTO/LoginDTO.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DTO/UserDTO.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/images/avatar-placeholder.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/Avatar.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/Button.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/Input.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/constants.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controlers/AuthController.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hooks/userLoginForm.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/User.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/navigation/router.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/repositories/AuthRepository.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/AuthService.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/types/userTypes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/formatDate.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/validateEmail.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,9 +99,9 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets\images" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\app" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets\icons" />
-      <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets\images" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\" />
       <recent name="C:\Users\Jituska\Desktop\JidloLepe\assets" />
     </key>
