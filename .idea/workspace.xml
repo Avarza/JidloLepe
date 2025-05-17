@@ -7,7 +7,50 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="remade přihlašování s business logikou a pro BTWA3" />
+    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="remade přihlašování s business logikou a pro BTWA3">
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/AllergenController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/AuthController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/UserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/testController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/AllergenDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/LoginDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/RegisterDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/UpdateUserAllergensDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/UserDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/entity/Allergen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/entity/Role.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/entity/User.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/repository/AllergenRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/repository/RoleRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/repository/UserRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtRequestFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/SecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/UserDetailService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/WebSecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/AllergenService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/AuthService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/UserService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/resources/application.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepe_backend/.idea/libraries/J2EE_1_4_J2EE_1_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepe_backend/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepe_backend/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepe_backend/src/main/java/com/JidloLepe/dto/UserDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled/src/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled/untitled.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepe_backend/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepe_backend/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepe_backend/JidloLepe_backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepe_backend/JidloLepe_backend.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepe_backend/src/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,7 +82,7 @@
     <dismissed value="$PROJECT_DIR$/package.json" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -111,6 +154,9 @@
       <workItem from="1745252236850" duration="967000" />
       <workItem from="1745346025674" duration="4730000" />
       <workItem from="1746162513133" duration="197000" />
+      <workItem from="1747255242327" duration="662000" />
+      <workItem from="1747497695574" duration="1871000" />
+      <workItem from="1747506679685" duration="2091000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />

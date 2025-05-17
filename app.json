@@ -22,6 +22,9 @@
       ],
       "package": "com.avarza.JidloLepe"
     },
+    "packagerOpts": {
+      "hostType": "lan"
+    },
     "web": {
       "bundler": "metro",
       "output": "static",
