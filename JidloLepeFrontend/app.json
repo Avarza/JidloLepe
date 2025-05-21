@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "JidloLepe",
+    "slug": "JidloLepe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/Logo.png",
+    "scheme": "jidlolepe",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/Logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.CAMERA"
+      ],
+      "package": "com.avarza.JidloLepe"
+    },
+    "packagerOpts": {
+      "hostType": "lan"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/icons/Logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icons/Logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-barcode-scanner",
+      [
+        "@react-native-google-signin/google-signin"
+      ],
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactNativeBridgeless": false
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c7aed03c-2016-47d2-8555-9267d6664042"
+      }
+    }
+  }
+}
