@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c7f13f15-efc0-4c5a-b2e0-f2e54c3bdbaf" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../JidloLepe_backend/.idea/libraries/J2EE_1_4_J2EE_1_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JidloLepe_backend/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JidloLepe_backend/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JidloLepe_backend/src/main/java/com/JidloLepe/dto/UserDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JidloLepe_backend/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../JidloLepe_backend/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JidloLepe_backend/JidloLepe_backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../JidloLepe_backend/JidloLepe_backend.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JidloLepe_backend/src/Main.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2x6Y1JUkKTtFvPOdJDE5E8iB9B4" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c7f13f15-efc0-4c5a-b2e0-f2e54c3bdbaf" name="Changes" comment="" />
+      <created>1747259775639</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747259775639</updated>
+      <workItem from="1747259777077" duration="138000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
