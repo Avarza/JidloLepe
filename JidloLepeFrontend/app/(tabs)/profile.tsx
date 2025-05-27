@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, TextInput, Image, StyleSheet,
-    ScrollView, TouchableOpacity, Alert, Button, FlatList
+    ScrollView, TouchableOpacity, Alert, Button
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/authContext';
@@ -11,28 +11,40 @@ import { useFocusEffect } from '@react-navigation/native';
 export default function ProfileTabScreen() {
     const router = useRouter();
     const { isLoggedIn, login, logout } = useAuth();
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [userAllergens, setUserAllergens] = useState<string[]>([]);
 
-    // nový stav pro produkty historie
-    const [mockProducts, setMockProducts] = useState<
-        { code: string; name: string; image: string }[]
-    >([]);
+    const [mockProducts, setMockProducts] = useState<{ code: string; name: string; image: string }[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
 
-    const handleLogin = () => {
-        if (username === 'admin' && password === 'admin') {
+    const handleLogin = async () => {
+        console.log('📤 Login pokus s:', email);
+        try {
+            const response = await fetch('http://192.168.30.106:8082/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Neplatné přihlašovací údaje');
+            }
+
+            const data = await response.json();
+            await AsyncStorage.setItem('token', data.token);
             login();
-        } else {
-            Alert.alert('Chyba', 'Neplatné přihlašovací údaje');
+        } catch (error: any) {
+            Alert.alert('Chyba přihlášení', error.message || 'Neznámá chyba');
         }
     };
 
     const handleLogout = () => {
         logout();
-        setUsername('');
+        setEmail('');
         setPassword('');
+        setUserAllergens([]);
     };
 
     const handlePasswordChange = () => {
@@ -43,23 +55,32 @@ export default function ProfileTabScreen() {
         Alert.alert('Změna avatara', 'Zde může být výběr nebo upload fotky.');
     };
 
-    // Načtení alergenů ze storage
+    // ✅ Načti alergeny z backendu pomocí JWT
     useFocusEffect(
         React.useCallback(() => {
-            const loadAllergens = async () => {
+            const fetchAllergensFromBackend = async () => {
                 try {
-                    const json = await AsyncStorage.getItem('user_allergens');
-                    if (json) setUserAllergens(JSON.parse(json));
-                    else setUserAllergens([]);
+                    const token = await AsyncStorage.getItem('token');
+                    if (!token) return;
+
+                    const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+
+                    if (!response.ok) throw new Error('Chyba při načítání alergenů');
+                    const data: string[] = await response.json();
+                    setUserAllergens(data);
                 } catch (e) {
-                    console.error('Chyba při načítání alergenů:', e);
+                    console.error('❌ Chyba při načítání alergenů:', e);
                 }
             };
-            if (isLoggedIn) loadAllergens();
+
+            if (isLoggedIn) fetchAllergensFromBackend();
         }, [isLoggedIn])
     );
 
-    // Načtení 4 náhodných snack produktů
+    // (volitelně): historie z OpenFoodFacts
     useEffect(() => {
         const fetchHistoryProducts = async () => {
             try {
@@ -68,13 +89,8 @@ export default function ProfileTabScreen() {
                 );
                 const json = await res.json();
 
-                // Filtrování platných produktů se jménem a obrázkem
                 const valid = json.products
-                    .filter(
-                        (p: any) =>
-                            p.code && p.product_name && p.image_front_url
-                    )
-                    // promíchej a vezmi první 4
+                    .filter((p: any) => p.code && p.product_name && p.image_front_url)
                     .sort(() => 0.5 - Math.random())
                     .slice(0, 4)
                     .map((p: any) => ({
@@ -96,14 +112,15 @@ export default function ProfileTabScreen() {
 
     if (!isLoggedIn) {
         return (
-            <View  className= "bg-accent" style={styles.loginContainer}>
+            <View style={styles.loginContainer}>
                 <Text style={styles.title}>Přihlášení</Text>
                 <TextInput
-                    placeholder="Uživatelské jméno"
-                    value={username}
-                    onChangeText={setUsername}
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
                     style={styles.input}
                     autoCapitalize="none"
+                    keyboardType="email-address"
                 />
                 <TextInput
                     placeholder="Heslo"
@@ -128,7 +145,7 @@ export default function ProfileTabScreen() {
 
             <View style={styles.content}>
                 <Text style={styles.name}>Jitka Kroupová</Text>
-                <Text style={styles.email}>jitka@example.com</Text>
+                <Text style={styles.email}>{email}</Text>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Moje alergeny</Text>

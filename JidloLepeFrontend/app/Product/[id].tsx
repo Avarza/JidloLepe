@@ -9,9 +9,9 @@ import {
     TouchableOpacity
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import icons from "@/constants/icons";
 import allergensData from "@/assets/data/allergens.json";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ProductData {
     product_name: string;
@@ -29,12 +29,12 @@ export default function ProductDetail() {
     const [userAllergens, setUserAllergens] = useState<string[]>([]);
     const [overlayVisible, setOverlayVisible] = useState(true);
 
+    // 🥫 Načti data o produktu
     useEffect(() => {
         const fetchProductData = async () => {
             try {
                 const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${id}.json`);
                 const data = await response.json();
-
                 if (data.product) {
                     setProductData(data.product);
                 }
@@ -48,21 +48,32 @@ export default function ProductDetail() {
         }
     }, [id]);
 
+    // 🧠 Načti alergeny z backendu (JWT)
     useEffect(() => {
-        const loadUserAllergens = async () => {
+        const fetchUserAllergens = async () => {
             try {
-                const json = await AsyncStorage.getItem('user_allergens');
-                if (json) {
-                    setUserAllergens(JSON.parse(json));
-                }
+                const token = await AsyncStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Chyba při načítání alergenů');
+                const data: string[] = await response.json();
+                setUserAllergens(data); // např. ["Lepek", "Ryby"]
             } catch (err) {
-                console.error('Chyba při načítání uživatelských alergenů:', err);
+                console.error('❌ Chyba při načítání uživatelských alergenů:', err);
             }
         };
 
-        loadUserAllergens();
+        fetchUserAllergens();
     }, []);
 
+    // 🔍 Porovnej složení s alergeny
     useEffect(() => {
         const ingredients =
             productData?.ingredients_text_cz ||
