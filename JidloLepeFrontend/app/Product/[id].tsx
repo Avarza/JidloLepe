@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Text, View, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+    Text,
+    View,
+    Image,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import icons from "@/constants/icons";
-import allergensData from "@/assets/data/allergens.json"; // Importuj JSON lokálně
+import allergensData from "@/assets/data/allergens.json";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ProductData {
     product_name: string;
@@ -18,7 +26,7 @@ export default function ProductDetail() {
     const router = useRouter();
     const [productData, setProductData] = useState<ProductData | null>(null);
     const [hasAllergen, setHasAllergen] = useState<boolean | null>(null);
-    const [userAllergens, setUserAllergens] = useState<string[]>(['mléko', 'lepek']); // české názvy
+    const [userAllergens, setUserAllergens] = useState<string[]>([]);
     const [overlayVisible, setOverlayVisible] = useState(true);
 
     useEffect(() => {
@@ -31,7 +39,7 @@ export default function ProductDetail() {
                     setProductData(data.product);
                 }
             } catch (error) {
-                console.error('Error fetching product data:', error);
+                console.error('Chyba při načítání produktu:', error);
             }
         };
 
@@ -40,19 +48,20 @@ export default function ProductDetail() {
         }
     }, [id]);
 
-    const checkForAllergen = (ingredientsText: string | null) => {
-        if (!ingredientsText || userAllergens.length === 0) return;
+    useEffect(() => {
+        const loadUserAllergens = async () => {
+            try {
+                const json = await AsyncStorage.getItem('user_allergens');
+                if (json) {
+                    setUserAllergens(JSON.parse(json));
+                }
+            } catch (err) {
+                console.error('Chyba při načítání uživatelských alergenů:', err);
+            }
+        };
 
-        const lowerIngredients = ingredientsText.toLowerCase();
-
-        // Seznam všech překladů alergenu, které chce uživatel detekovat
-        const translationsToCheck = allergensData
-            .filter((item) => userAllergens.includes(item.cz.toLowerCase()))
-            .flatMap((item) => item.translations.map((tr) => tr.toLowerCase()));
-
-        const found = translationsToCheck.some((term) => lowerIngredients.includes(term));
-        setHasAllergen(found);
-    };
+        loadUserAllergens();
+    }, []);
 
     useEffect(() => {
         const ingredients =
@@ -61,7 +70,19 @@ export default function ProductDetail() {
             productData?.ingredients_text_en ||
             null;
 
-        checkForAllergen(ingredients);
+        if (!ingredients || userAllergens.length === 0) return;
+
+        const lowerIngredients = ingredients.toLowerCase();
+
+        const translationsToCheck = allergensData
+            .filter((item) => userAllergens.includes(item.cz))
+            .flatMap((item) => item.translations.map((tr) => tr.toLowerCase()));
+
+        const found = translationsToCheck.some((term) =>
+            lowerIngredients.includes(term)
+        );
+
+        setHasAllergen(found);
     }, [productData, userAllergens]);
 
     if (!productData) {
@@ -75,9 +96,17 @@ export default function ProductDetail() {
     return (
         <View style={styles.container}>
             {overlayVisible && hasAllergen !== null && (
-                <View style={[styles.overlay, { backgroundColor: 'rgba(0, 0, 0, 0.9)' }]}>
-                    <Image source={hasAllergen ? icons.bad : icons.good} style={styles.icon} />
-                    <Text style={[styles.overlayText, { color: hasAllergen ? 'red' : 'green' }]}>
+                <View style={styles.overlay}>
+                    <Image
+                        source={hasAllergen ? icons.bad : icons.good}
+                        style={styles.icon}
+                    />
+                    <Text
+                        style={[
+                            styles.overlayText,
+                            { color: hasAllergen ? 'red' : 'green' },
+                        ]}
+                    >
                         {hasAllergen
                             ? 'Obsahuje alergeny, které jste zadali'
                             : 'Bez alergenů, které jste zadali'}
@@ -94,13 +123,19 @@ export default function ProductDetail() {
             <ScrollView style={styles.productContainer}>
                 <View style={styles.productHeader}>
                     <Text style={styles.productTitle}>{productData.product_name}</Text>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.push('/scan')}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
                         <Ionicons name="arrow-back" size={30} color="black" />
                     </TouchableOpacity>
                 </View>
 
                 {productData.image_url && (
-                    <Image source={{ uri: productData.image_url }} style={styles.productImage} />
+                    <Image
+                        source={{ uri: productData.image_url }}
+                        style={styles.productImage}
+                    />
                 )}
 
                 <Text style={styles.sectionTitle}>Složení:</Text>
@@ -115,18 +150,24 @@ export default function ProductDetail() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
+    container: {
+        flex: 1,
+        backgroundColor: '#E8DFD0',
+    },
     overlay: {
         position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         zIndex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        opacity: 0.8,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        opacity: 0.9,
     },
     overlayText: {
-        color: 'white',
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 20,
@@ -142,21 +183,26 @@ const styles = StyleSheet.create({
         height: 50,
         marginBottom: 20,
     },
-    productContainer: { padding: 20 },
+    productContainer: {
+        padding: 20,
+    },
     productHeader: {
-        flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 20,
+        paddingTop: 40,
+        justifyContent: 'center',
+        position: 'relative',
     },
     productTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 10,
         marginRight: 10,
+        textAlign: 'center',
     },
     backButton: {
         position: 'absolute',
-        top: 10,
+        top: 0,
         left: 10,
     },
     productImage: {

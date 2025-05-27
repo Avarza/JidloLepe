@@ -55,7 +55,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:19006", "http://192.168.1.10:19006"));
+        configuration.setAllowedOrigins(List.of(
+                "http://192.168.30.106:19006", // pokud běží React Native Web
+                "http://192.168.30.106",       // Expo Go nebo mobilní prohlížeč
+                "exp://192.168.30.106:8081"    // volitelné, ale Expo Go používá exp://
+        ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

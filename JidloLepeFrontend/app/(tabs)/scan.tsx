@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import colors from '@/tailwind.config';
 
 const ScanScreen = () => {
@@ -40,7 +42,7 @@ const ScanScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <CameraView
                 style={StyleSheet.absoluteFillObject}
                 facing={facing}
@@ -65,7 +67,7 @@ const ScanScreen = () => {
             </View>
 
 
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -129,8 +131,11 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
+        marginBottom: 40,
     },
-    buttonText: {
+
+
+buttonText: {
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',

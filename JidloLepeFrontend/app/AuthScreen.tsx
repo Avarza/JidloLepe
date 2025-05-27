@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     switchText: {
-        color: '#007BFF',
+        color: '#E8DFD0',
         textAlign: 'center',
         marginTop: 10,
     },

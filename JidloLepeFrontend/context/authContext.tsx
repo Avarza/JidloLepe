@@ -1,30 +1,22 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
-
-type User = {
-    email: string;
-};
+// context/authContext.tsx
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type AuthContextType = {
-    user: User | null;
-    login: (email: string) => void;
+    isLoggedIn: boolean;
+    login: () => void;
     logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const login = (email: string) => {
-        setUser({ email });
-    };
-
-    const logout = () => {
-        setUser(null);
-    };
+    const login = () => setIsLoggedIn(true);
+    const logout = () => setIsLoggedIn(false);
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
@@ -32,8 +24,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
+    if (!context) throw new Error('useAuth must be used within AuthProvider');
     return context;
 };
