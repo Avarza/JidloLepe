@@ -23,6 +23,9 @@ public class UserService {
         this.userRepository = userRepository;
         this.allergenRepository = allergenRepository;
     }
+    public User getUserEntityByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
 
     public UserDTO updateUserAllergens(UserDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
