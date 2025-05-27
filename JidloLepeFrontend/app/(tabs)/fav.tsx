@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+    import React, { useState, useEffect } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, Alert,
     StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Button
@@ -83,6 +83,7 @@ export default function FavScreen() {
 
                 <View style={{ marginTop: 30, paddingBottom: 100 }}>
                     <Button title="Uložit výběr" onPress={saveAllergens} />
+
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>

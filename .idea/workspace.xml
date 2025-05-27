@@ -7,145 +7,10 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="asi done bez stylu">
-      <change afterPath="$PROJECT_DIR$/.idea/JidloLepe.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/JidloLepeApp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/swagger/SwaggerConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/DTO/LoginDTO.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/DTO/UserDTO.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/debug.keystore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/proguard-rules.pro" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/java/com/avarza/JidloLepe/MainActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/java/com/avarza/JidloLepe/MainApplication.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable-hdpi/splashscreen_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable-mdpi/splashscreen_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable-xhdpi/splashscreen_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable-xxhdpi/splashscreen_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable-xxxhdpi/splashscreen_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/drawable/rn_edit_text_material.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/values-night/colors.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/values/colors.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/values/strings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/app/src/main/res/values/styles.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/gradlew" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/gradlew.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/android/settings.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/_layout.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/fav.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/index.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/profile.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/scan.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/search.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/AuthScreen.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/Product/[id].tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/_layout.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/globals.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/data/allergens.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/fonts/SpaceMono-Regular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Add.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Add_full.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Back.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Bad.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Close.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Good.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Home.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Home_full.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Medical_icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Next.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Scan.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Search.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/Search_full.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/User.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/icons/User_full.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/images/avatar-placeholder.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/images/coffe-shop-4810584_1280.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/images/curry-7249247_1280.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/images/dessert-7321741_1280.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/assets/images/rectangle.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/babel.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/AlergiesForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/Avatar.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/Button.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/GoogleLoginButton.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/Input.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/allergenSelector.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/components/searchBar.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/config/api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/config/constants.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/constants/firebaseConfig.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/constants/icons.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/constants/images.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/context/authContext.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/controlers/AuthController.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/credentials.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/eas.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/hooks/userLoginForm.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/interfaces/interfaces.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/lib/firebase.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/lib/firestore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/metro.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/models/User.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/nativewind-env.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/navigation/router.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/repositories/AuthRepository.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/services/AuthService.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/services/allergenService.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/services/openFoodFacts.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/tailwind.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/translate.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/tsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/types/assets.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/types/userTypes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/untitled/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/untitled/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/untitled/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/untitled/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/untitled/src/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/untitled/untitled.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/utils/formatDate.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/JidloLepeFrontend/utils/validateEmail.ts" afterDir="false" />
+    <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="stylovani a barvičky">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/fav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/fav.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -253,7 +118,9 @@
       <workItem from="1747506679685" duration="2091000" />
       <workItem from="1747863275744" duration="463000" />
       <workItem from="1747929208005" duration="287000" />
-      <workItem from="1747929989510" duration="11095000" />
+      <workItem from="1747929989510" duration="11929000" />
+      <workItem from="1747992141802" duration="4778000" />
+      <workItem from="1748336562006" duration="953000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -343,7 +210,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747930340285</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="stylovani a barvičky">
+      <option name="closed" value="true" />
+      <created>1747952928715</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1747952928715</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -360,6 +235,7 @@
     <MESSAGE value="remade přihlašování s business logikou a pro BTWA3" />
     <MESSAGE value="funkční front end bez backendu" />
     <MESSAGE value="asi done bez stylu" />
-    <option name="LAST_COMMIT_MESSAGE" value="asi done bez stylu" />
+    <MESSAGE value="stylovani a barvičky" />
+    <option name="LAST_COMMIT_MESSAGE" value="stylovani a barvičky" />
   </component>
 </project>
