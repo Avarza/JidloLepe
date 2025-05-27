@@ -9,7 +9,9 @@ public class testController {
 
     @GetMapping("/test")
     public String test() {
+        System.out.println("TEST endpoint called");
         return "Test OK";
     }
 }
+
 

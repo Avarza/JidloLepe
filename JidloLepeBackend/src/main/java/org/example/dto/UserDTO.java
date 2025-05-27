@@ -1,9 +1,19 @@
 package org.example.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Set;
 
+@Schema(description = "DTO objekt pro uživatele s přiřazenými alergeny")
 public class UserDTO {
+
+    @Schema(description = "Email uživatele", example = "jan.kral@email.cz")
     private String email;
+
+    @Schema(
+            description = "ID alergenů, které má uživatel vybrané",
+            example = "[1, 2, 5]"
+    )
     private Set<Long> allergenIds;
 
     public UserDTO() {}

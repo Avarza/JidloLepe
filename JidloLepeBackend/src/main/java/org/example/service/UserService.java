@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -37,4 +38,13 @@ public class UserService {
         userRepository.save(user);
         return new UserDTO(user.getEmail(), dto.getAllergenIds());
     }
+    public Set<String> getUserAllergenNamesByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        return user.getAllergens().stream()
+                .map(Allergen::getName)
+                .collect(Collectors.toSet());
+    }
+
 }

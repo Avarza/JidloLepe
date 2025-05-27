@@ -1,44 +1,34 @@
 package org.example.controller;
 
+import org.example.dto.AuthResponse;
 import org.example.dto.LoginDTO;
-import org.example.security.JwtUtil;
 import org.example.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin("*")
 public class AuthController {
 
-    private final AuthService authService;
-    private final JwtUtil jwtUtil;
-
     @Autowired
-    public AuthController(AuthService authService, JwtUtil jwtUtil) {
-        this.authService = authService;
-        this.jwtUtil = jwtUtil;
-    }
+    @Qualifier("authServiceImpl") // pokud jsi přidal název
+    private AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-        String token = authService.login(loginDTO);
-        return ResponseEntity.ok(new AuthResponse(token));
-    }
+        try {
+            String token = authService.login(loginDTO);
+            return ResponseEntity.ok(new AuthResponse(token));
+        } catch (Exception e) {
+            System.out.println("❌ Výjimka v AuthController: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Neplatný email nebo heslo");
 
-    static class AuthResponse {
-        public String token;
-
-        public AuthResponse(String token) {
-            this.token = token;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = token;
         }
     }
+
 }

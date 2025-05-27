@@ -8,9 +8,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc370a8-ca49-4773-a454-44f37f468017" name="Changes" comment="stylovani a barvičky">
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/.idea/sqldialects.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/HashGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/AuthResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/AuthServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/UserDetailsServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/JidloLepeApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/JidloLepeApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/AllergenController.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/AllergenController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/testController.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/controller/testController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/AllergenDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/AllergenDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/LoginDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/LoginDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/UserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/dto/UserDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtRequestFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtRequestFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/JwtUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/security/UserDetailService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/swagger/SwaggerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/java/org/example/swagger/SwaggerConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/JidloLepeBackend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeBackend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/DTO/LoginDTO.ts" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/DTO/LoginDTO.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/fav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/fav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/(tabs)/profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/app/AuthScreen.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/AuthScreen.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/app/Product/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/app/Product/[id].tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/config/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/config/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/repositories/AuthRepository.ts" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/repositories/AuthRepository.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JidloLepeFrontend/services/AuthService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/JidloLepeFrontend/services/AuthService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,7 +149,7 @@
       <workItem from="1747929208005" duration="287000" />
       <workItem from="1747929989510" duration="11929000" />
       <workItem from="1747992141802" duration="4778000" />
-      <workItem from="1748336562006" duration="953000" />
+      <workItem from="1748336562006" duration="19410000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -218,7 +247,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747952928715</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="stylovani a barvičky">
+      <option name="closed" value="true" />
+      <created>1748337901914</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1748337901914</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

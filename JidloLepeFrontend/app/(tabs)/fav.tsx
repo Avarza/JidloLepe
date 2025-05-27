@@ -1,4 +1,4 @@
-    import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, Alert,
     StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Button
@@ -12,6 +12,19 @@ const allAllergens = [
     'Celer', 'Hořčice', 'Sezam', 'Skořápky'
 ];
 
+const allergenIdMap: { [key: string]: number } = {
+    Lepek: 1,
+    Mléko: 2,
+    Ořechy: 3,
+    Sója: 4,
+    Vejce: 5,
+    Ryby: 6,
+    Celer: 7,
+    Hořčice: 8,
+    Sezam: 9,
+    Skořápky: 10,
+};
+
 export default function FavScreen() {
     const { isLoggedIn } = useAuth();
     const router = useRouter();
@@ -19,19 +32,71 @@ export default function FavScreen() {
     const [search, setSearch] = useState('');
 
     useEffect(() => {
-        const loadAllergens = async () => {
-            const json = await AsyncStorage.getItem('user_allergens');
-            if (json) setSelected(JSON.parse(json));
+        const fetchAllergens = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Nepodařilo se načíst alergeny');
+
+                const data: string[] = await response.json();
+                setSelected(data);
+            } catch (e) {
+                console.error('Chyba při načítání alergenů:', e);
+            }
         };
-        loadAllergens();
-    }, []);
+
+        if (isLoggedIn) fetchAllergens();
+    }, [isLoggedIn]);
 
     const saveAllergens = async () => {
         try {
-            await AsyncStorage.setItem('user_allergens', JSON.stringify(selected));
-            Alert.alert('Hotovo', 'Alergeny byly uloženy');
-        } catch (e) {
-            Alert.alert('Chyba', 'Nepodařilo se uložit alergeny');
+            const token = await AsyncStorage.getItem('token');
+            if (!token) throw new Error('Uživatel není přihlášen');
+
+            const email = getEmailFromToken(token);
+            const allergenIds = selected.map(name => allergenIdMap[name]).filter(Boolean);
+
+            const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    email,
+                    allergenIds,
+                }),
+            });
+
+            if (!response.ok) throw new Error('Chyba při ukládání na server');
+            Alert.alert('Hotovo', 'Alergeny byly uloženy na server');
+        } catch (e: any) {
+            console.error('Chyba při ukládání alergenů:', e);
+            Alert.alert('Chyba', e.message || 'Nepodařilo se uložit alergeny');
+        }
+    };
+
+    const getEmailFromToken = (token: string): string => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map(c => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+                    .join('')
+            );
+            return JSON.parse(jsonPayload).sub;
+        } catch {
+            return '';
         }
     };
 
@@ -50,6 +115,14 @@ export default function FavScreen() {
             <View style={styles.centered}>
                 <Text style={styles.info}>Musíte být přihlášeni pro úpravu alergenů.</Text>
                 <Button title="Přejít na přihlášení" onPress={() => router.replace('/(tabs)/profile')} />
+                <Button
+                    title="Vymazat místní alergeny"
+                    onPress={async () => {
+                        await AsyncStorage.removeItem('user_allergens');
+                        Alert.alert('Hotovo', 'Lokálně uložené alergeny byly smazány.');
+                    }}
+                />
+
             </View>
         );
     }
@@ -81,9 +154,17 @@ export default function FavScreen() {
                     </TouchableOpacity>
                 ))}
 
+                <View style={styles.selectedList}>
+                    <Text style={{ fontWeight: 'bold' }}>Vybrané alergeny:</Text>
+                    {selected.length > 0 ? (
+                        <Text>{selected.join(', ')}</Text>
+                    ) : (
+                        <Text style={{ color: '#777' }}>Žádný alergen není vybrán</Text>
+                    )}
+                </View>
+
                 <View style={{ marginTop: 30, paddingBottom: 100 }}>
                     <Button title="Uložit výběr" onPress={saveAllergens} />
-
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -113,7 +194,7 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        color: '#EEE8DA',
+        borderColor: '#ccc',
         borderRadius: 8,
         padding: 10,
         marginBottom: 15,
@@ -126,5 +207,11 @@ const styles = StyleSheet.create({
     },
     selectedItem: {
         backgroundColor: '#d1fae5',
+    },
+    selectedList: {
+        marginTop: 20,
+        backgroundColor: '#f5f5f5',
+        padding: 12,
+        borderRadius: 8,
     },
 });

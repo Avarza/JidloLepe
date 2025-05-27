@@ -1,22 +1,20 @@
+// src/repositories/AuthRepository.ts
 import { LoginRequestDTO } from '@/DTO/LoginDTO';
+import { API_BASE_URL } from '@/config/api';
 
-export async function loginWithCredentials(credentials: LoginRequestDTO): Promise<{ success: boolean }> {
-    try {
-        const response = await fetch('https://your-backend.com/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(credentials),
-        });
+export async function loginRequest(dto: LoginRequestDTO): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dto),
+    });
 
-        if (response.ok) {
-            const data = await response.json();
-            // můžeš zde uložit token do SecureStore nebo AsyncStorage
-            return { success: true };
-        }
-
-        return { success: false };
-    } catch (error) {
-        console.error('Chyba při přihlášení:', error);
-        return { success: false };
+    if (!response.ok) {
+        throw new Error('Neplatné přihlašovací údaje');
     }
+
+    const data = await response.json();
+    return data.token;
 }
