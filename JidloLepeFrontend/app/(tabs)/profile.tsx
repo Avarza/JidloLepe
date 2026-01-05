@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import {API_BASE_URL} from "@/config/api";
 
 export default function ProfileTabScreen() {
     const router = useRouter();
@@ -21,7 +22,7 @@ export default function ProfileTabScreen() {
     const handleLogin = async () => {
         console.log('📤 Login pokus s:', email);
         try {
-            const response = await fetch('http://192.168.30.106:8082/api/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -63,7 +64,7 @@ export default function ProfileTabScreen() {
                     const token = await AsyncStorage.getItem('token');
                     if (!token) return;
 
-                    const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                    const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                         method: 'GET',
                         headers: { Authorization: `Bearer ${token}` },
                     });

@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import icons from "@/constants/icons";
 import allergensData from "@/assets/data/allergens.json";
+import {API_BASE_URL} from "@/config/api";
 
 interface ProductData {
     product_name: string;
@@ -55,7 +56,7 @@ export default function ProductDetail() {
                 const token = await AsyncStorage.getItem('token');
                 if (!token) return;
 
-                const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                     method: 'GET',
                     headers: {
                         Authorization: `Bearer ${token}`,

@@ -37,7 +37,7 @@ export default function FavScreen() {
                 const token = await AsyncStorage.getItem('token');
                 if (!token) return;
 
-                const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+                const response = await fetch('http://10.221.236.239:8082/api/users/allergens', {
                     method: 'GET',
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export default function FavScreen() {
             const email = getEmailFromToken(token);
             const allergenIds = selected.map(name => allergenIdMap[name]).filter(Boolean);
 
-            const response = await fetch('http://192.168.30.106:8082/api/users/allergens', {
+            const response = await fetch('http://10.221.236.239:8082/api/users/allergens', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

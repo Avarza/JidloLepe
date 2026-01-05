@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import SearchBar from "@/components/searchBar";
 import icons from "@/constants/icons";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {API_BASE_URL} from "@/config/api";
 
 interface Product {
     code: string;
@@ -13,22 +14,24 @@ interface Product {
 
 export default function Home() {
     const router = useRouter();
-    const insets = useSafeAreaInsets(); // <- odsazení odspodu
+    const insets = useSafeAreaInsets();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch(
-                    'https://world.openfoodfacts.org/cgi/search.pl?action=process&tagtype_0=categories&tag_contains_0=contains&tag_0=snacks&page_size=5&json=true'
-                );
+                const response = await fetch(`${API_BASE_URL}/api/products/`);
                 const data = await response.json();
 
-                setProducts(data.products);
-                console.log("Načtené produkty:", data.products);
+                if (data.products) {
+                    setProducts(data.products);
+                    console.log(" Načtené produkty:", data.products.length);
+                } else {
+                    console.warn(" Žádné produkty nenalezeny v odpovědi.");
+                }
             } catch (error) {
-                console.error('Chyba při načítání produktů:', error);
+                console.error(' Chyba při načítání produktů:', error);
             } finally {
                 setLoading(false);
             }
@@ -48,7 +51,7 @@ export default function Home() {
     return (
         <ScrollView
             className="flex-1 px-4 pt-10 bg-accent"
-            contentContainerStyle={{ paddingBottom: insets.bottom + 100 }} // přidá místo odspodu
+            contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         >
             <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
 

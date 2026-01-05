@@ -1,3 +1,6 @@
+import {LoginRequestDTO} from "@/DTO/LoginDTO";
+import {API_BASE_URL} from "@/config/api";
+
 export async function login(credentials: LoginRequestDTO): Promise<boolean> {
     try {
         console.log("📤 Posílám login na:", `${API_BASE_URL}/api/auth/login`);
