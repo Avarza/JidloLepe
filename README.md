@@ -164,4 +164,4 @@ Aplikace je vyvíjena pomocí **Expo Go** – připojením telefonu ke stejné W
 
 Autor: **Jitka Kroupová** – studentem UPCE FEI
 
-Repozitář: [github.com/avarza1/jidlolepe](https://github.com/avarza1/jidlolepe)
+Repozitář: [github.com/avarza1/jidlolepe](https://github.com/Avarza/jidlolepe)
