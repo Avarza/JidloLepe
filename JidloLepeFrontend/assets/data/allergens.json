@@ -1,62 +1,92 @@
 [
   {
-    "cz": "mléko",
-    "translations": ["mléko", "milk", "lait", "milch"]
+    "cz": "Lepek",
+    "en": ["gluten", "wheat"],
+    "de": ["weizen", "glutenhaltig"],
+    "fr": ["gluten"],
+    "pl": ["gluten"],
+    "sk": ["glutén"],
+    "variants": ["gliadin", "gluten protein"]
   },
   {
-    "cz": "vejce",
-    "translations": ["vejce", "egg", "oeuf", "ei"]
+    "cz": "Mléko",
+    "en": ["milk", "lactose", "casein"],
+    "de": ["milch", "laktose", "kasein"],
+    "fr": ["lait", "lactose"],
+    "pl": ["mleko", "laktoza"],
+    "sk": ["mlieko", "laktóza"],
+    "variants": ["milk powder", "skimmed milk"]
   },
   {
-    "cz": "lepek",
-    "translations": ["lepek", "gluten"]
+    "cz": "Ořechy",
+    "en": ["nuts", "walnut", "almond", "hazelnut"],
+    "de": ["nüsse", "walnuss", "mandel", "haselnuss"],
+    "fr": ["noix", "amande", "noisette"],
+    "pl": ["orzechy"],
+    "sk": ["orechy"],
+    "variants": ["nut traces"]
   },
   {
-    "cz": "arašídy",
-    "translations": ["arašídy", "peanut", "arachide", "erdnuss"]
+    "cz": "Sója",
+    "en": ["soy", "soya", "soybean"],
+    "de": ["soja"],
+    "fr": ["soja"],
+    "pl": ["soja"],
+    "sk": ["sója"],
+    "variants": ["soy protein", "soy lecithin"]
   },
   {
-    "cz": "ryby",
-    "translations": ["ryby", "fish", "poisson", "fisch"]
+    "cz": "Vejce",
+    "en": ["egg", "eggs", "albumin"],
+    "de": ["ei", "eier", "eiweiß"],
+    "fr": ["oeuf"],
+    "pl": ["jajko"],
+    "sk": ["vajce"],
+    "variants": ["egg powder"]
   },
   {
-    "cz": "skořápky",
-    "translations": ["skořápky", "shellfish", "crustacés", "schalentiere"]
+    "cz": "Ryby",
+    "en": ["fish", "salmon", "tuna"],
+    "de": ["fisch"],
+    "fr": ["poisson"],
+    "pl": ["ryba"],
+    "sk": ["ryby"],
+    "variants": ["fish oil"]
   },
   {
-    "cz": "sója",
-    "translations": ["sója", "soy", "soja", "sojabohne"]
+    "cz": "Celer",
+    "en": ["celery"],
+    "de": ["sellerie"],
+    "fr": ["céleri"],
+    "pl": ["seler"],
+    "sk": ["zeler"],
+    "variants": []
   },
   {
-    "cz": "ořechy",
-    "translations": ["ořechy", "nuts", "noix", "nüsse"]
+    "cz": "Hořčice",
+    "en": ["mustard"],
+    "de": ["senf"],
+    "fr": ["moutarde"],
+    "pl": ["musztarda"],
+    "sk": ["horčica"],
+    "variants": []
   },
   {
-    "cz": "celer",
-    "translations": ["celer", "celery", "céleri"]
+    "cz": "Sezam",
+    "en": ["sesame"],
+    "de": ["sesam"],
+    "fr": ["sésame"],
+    "pl": ["sezam"],
+    "sk": ["sezam"],
+    "variants": ["sesame oil"]
   },
   {
-    "cz": "hořčice",
-    "translations": ["hořčice", "mustard", "moutarde", "senf"]
-  },
-  {
-    "cz": "sezam",
-    "translations": ["sezam", "sesame", "sésame", "sesam"]
-  },
-  {
-    "cz": "oxid siřičitý",
-    "translations": ["oxid siřičitý", "sulphur dioxide", "dioxyde de soufre"]
-  },
-  {
-    "cz": "vlčí bob",
-    "translations": ["vlčí bob", "lupin", "lupine"]
-  },
-  {
-    "cz": "měkkýši",
-    "translations": ["měkkýši", "molluscs", "mollusques", "weichtiere"]
-  },
-  {
-    "cz": "lískové ořechy",
-    "translations": ["lískové ořechy", "hazelnuts", "noisettes", "haselnüsse"]
+    "cz": "Skořápky",
+    "en": ["shellfish", "crustaceans"],
+    "de": ["schalentiere"],
+    "fr": ["crustacés"],
+    "pl": ["skorupiaki"],
+    "sk": ["kôrovce"],
+    "variants": ["shrimp", "prawn"]
   }
 ]

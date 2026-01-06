@@ -6,6 +6,7 @@ import {
 import { useAuth } from '@/context/authContext';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from "@/config/api";
 
 const allAllergens = [
     'Lepek', 'Mléko', 'Ořechy', 'Sója', 'Vejce', 'Ryby',
@@ -31,13 +32,14 @@ export default function FavScreen() {
     const [selected, setSelected] = useState<string[]>([]);
     const [search, setSearch] = useState('');
 
+    // 🔄 Načti alergeny z backendu
     useEffect(() => {
         const fetchAllergens = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 if (!token) return;
 
-                const response = await fetch('http://10.221.236.239:8082/api/users/allergens', {
+                const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                     method: 'GET',
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -47,7 +49,7 @@ export default function FavScreen() {
                 if (!response.ok) throw new Error('Nepodařilo se načíst alergeny');
 
                 const data: string[] = await response.json();
-                setSelected(data);
+                setSelected(data); // backend vrací názvy → super
             } catch (e) {
                 console.error('Chyba při načítání alergenů:', e);
             }
@@ -56,6 +58,7 @@ export default function FavScreen() {
         if (isLoggedIn) fetchAllergens();
     }, [isLoggedIn]);
 
+    // 💾 Ulož alergeny na backend
     const saveAllergens = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -64,7 +67,7 @@ export default function FavScreen() {
             const email = getEmailFromToken(token);
             const allergenIds = selected.map(name => allergenIdMap[name]).filter(Boolean);
 
-            const response = await fetch('http://10.221.236.239:8082/api/users/allergens', {
+            const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,6 +80,7 @@ export default function FavScreen() {
             });
 
             if (!response.ok) throw new Error('Chyba při ukládání na server');
+
             Alert.alert('Hotovo', 'Alergeny byly uloženy na server');
         } catch (e: any) {
             console.error('Chyba při ukládání alergenů:', e);
@@ -84,6 +88,7 @@ export default function FavScreen() {
         }
     };
 
+    // 📧 Získání emailu z JWT tokenu
     const getEmailFromToken = (token: string): string => {
         try {
             const base64Url = token.split('.')[1];
@@ -100,6 +105,7 @@ export default function FavScreen() {
         }
     };
 
+    // ✔️ Přepínání alergenů
     const toggleAllergen = (item: string) => {
         setSelected(prev =>
             prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
@@ -110,19 +116,12 @@ export default function FavScreen() {
         a.toLowerCase().includes(search.toLowerCase())
     );
 
+    // ❗ Pokud není přihlášen → nabídni přihlášení
     if (!isLoggedIn) {
         return (
             <View style={styles.centered}>
                 <Text style={styles.info}>Musíte být přihlášeni pro úpravu alergenů.</Text>
                 <Button title="Přejít na přihlášení" onPress={() => router.replace('/(tabs)/profile')} />
-                <Button
-                    title="Vymazat místní alergeny"
-                    onPress={async () => {
-                        await AsyncStorage.removeItem('user_allergens');
-                        Alert.alert('Hotovo', 'Lokálně uložené alergeny byly smazány.');
-                    }}
-                />
-
             </View>
         );
     }

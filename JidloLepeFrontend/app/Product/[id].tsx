@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import icons from "@/constants/icons";
 import allergensData from "@/assets/data/allergens.json";
-import {API_BASE_URL} from "@/config/api";
+import { API_BASE_URL } from "@/config/api";
 
 interface ProductData {
     product_name: string;
@@ -20,6 +20,10 @@ interface ProductData {
     ingredients_text: string | null;
     ingredients_text_cz?: string | null;
     ingredients_text_en?: string | null;
+    ingredients_text_de?: string | null;
+    ingredients_text_fr?: string | null;
+    ingredients_text_pl?: string | null;
+    ingredients_text_sk?: string | null;
 }
 
 export default function ProductDetail() {
@@ -44,9 +48,7 @@ export default function ProductDetail() {
             }
         };
 
-        if (id) {
-            fetchProductData();
-        }
+        if (id) fetchProductData();
     }, [id]);
 
     // 🧠 Načti alergeny z backendu (JWT)
@@ -58,12 +60,11 @@ export default function ProductDetail() {
 
                 const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                     method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
 
                 if (!response.ok) throw new Error('Chyba při načítání alergenů');
+
                 const data: string[] = await response.json();
                 setUserAllergens(data); // např. ["Lepek", "Ryby"]
             } catch (err) {
@@ -74,25 +75,45 @@ export default function ProductDetail() {
         fetchUserAllergens();
     }, []);
 
-    // 🔍 Porovnej složení s alergeny
+    // 🔍 Porovnej složení s alergeny (vícejazyčně)
     useEffect(() => {
+        if (!productData || userAllergens.length === 0) return;
+
         const ingredients =
-            productData?.ingredients_text_cz ||
-            productData?.ingredients_text ||
-            productData?.ingredients_text_en ||
+            productData.ingredients_text_cz ||
+            productData.ingredients_text ||
+            productData.ingredients_text_en ||
+            productData.ingredients_text_de ||
+            productData.ingredients_text_fr ||
+            productData.ingredients_text_pl ||
+            productData.ingredients_text_sk ||
             null;
 
-        if (!ingredients || userAllergens.length === 0) return;
+        if (!ingredients) return;
 
         const lowerIngredients = ingredients.toLowerCase();
 
-        const translationsToCheck = allergensData
-            .filter((item) => userAllergens.includes(item.cz))
-            .flatMap((item) => item.translations.map((tr) => tr.toLowerCase()));
-
-        const found = translationsToCheck.some((term) =>
-            lowerIngredients.includes(term)
+        // 1) Najdi alergeny, které si uživatel vybral
+        const selectedAllergens = allergensData.filter(item =>
+            userAllergens.includes(item.cz)
         );
+
+        // 2) Vytvoř seznam všech překladů a variant
+        const allTerms = selectedAllergens.flatMap(item => {
+            const terms = [
+                item.cz,
+                ...(item.en || []),
+                ...(item.de || []),
+                ...(item.fr || []),
+                ...(item.pl || []),
+                ...(item.sk || []),
+                ...(item.variants || [])
+            ];
+            return terms.map(t => t.toLowerCase());
+        });
+
+        // 3) Porovnání
+        const found = allTerms.some(term => lowerIngredients.includes(term));
 
         setHasAllergen(found);
     }, [productData, userAllergens]);
@@ -154,6 +175,7 @@ export default function ProductDetail() {
                 <Text>
                     {productData.ingredients_text_cz ||
                         productData.ingredients_text ||
+                        productData.ingredients_text_en ||
                         'Složení není k dispozici.'}
                 </Text>
             </ScrollView>
