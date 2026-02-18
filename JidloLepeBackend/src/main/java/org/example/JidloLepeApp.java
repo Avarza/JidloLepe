@@ -17,5 +17,5 @@ public class JidloLepeApp {
         SpringApplication.run(JidloLepeApp.class, args);
 
     }
-}
+}   
 

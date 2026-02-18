@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import {API_BASE_URL} from "@/config/api";
+import { API_BASE_URL } from "@/config/api";
 
 export default function ProfileTabScreen() {
     const router = useRouter();
@@ -20,7 +20,6 @@ export default function ProfileTabScreen() {
     const [loadingHistory, setLoadingHistory] = useState(true);
 
     const handleLogin = async () => {
-        console.log('📤 Login pokus s:', email);
         try {
             const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
@@ -41,7 +40,9 @@ export default function ProfileTabScreen() {
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("user_allergens");
         logout();
         setEmail('');
         setPassword('');
@@ -56,7 +57,6 @@ export default function ProfileTabScreen() {
         Alert.alert('Změna avatara', 'Zde může být výběr nebo upload fotky.');
     };
 
-    // ✅ Načti alergeny z backendu pomocí JWT
     useFocusEffect(
         React.useCallback(() => {
             const fetchAllergensFromBackend = async () => {
@@ -81,7 +81,6 @@ export default function ProfileTabScreen() {
         }, [isLoggedIn])
     );
 
-    // (volitelně): historie z OpenFoodFacts
     useEffect(() => {
         const fetchHistoryProducts = async () => {
             try {
@@ -130,7 +129,9 @@ export default function ProfileTabScreen() {
                     style={styles.input}
                     secureTextEntry
                 />
-                <Button title="Přihlásit se" onPress={handleLogin} />
+                <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                    <Text style={styles.loginButtonText}>Přihlásit se</Text>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -216,7 +217,9 @@ export default function ProfileTabScreen() {
 
 const styles = StyleSheet.create({
     loginContainer: { flex: 1, justifyContent: 'center', padding: 20 },
-    container: { flex: 1, backgroundColor: '#EEE8DA' },
+
+    container: { flex: 1, backgroundColor: '#E8DFD0' },
+
     header: {
         backgroundColor: '#764534',
         height: 120,
@@ -224,6 +227,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingBottom: 40,
     },
+
     avatar: {
         width: 100,
         height: 100,
@@ -234,29 +238,69 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: -40,
     },
+
     content: { marginTop: 60, alignItems: 'center', padding: 20 },
+
     name: { fontSize: 24, fontWeight: 'bold', marginTop: 10 },
+
     email: { fontSize: 14, color: '#888' },
+
     section: { width: '100%', marginTop: 30 },
+
     sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+
     productCard: { width: 120, marginRight: 15, alignItems: 'center' },
+
     productImage: { width: 100, height: 100, borderRadius: 12, marginBottom: 5 },
+
     productName: { textAlign: 'center', fontSize: 12 },
+
     buttonGroup: { width: '100%', marginTop: 30 },
+
     actionButton: {
-        backgroundColor: '#E8DFD0',
+        backgroundColor: '#764534',
         padding: 12,
         marginBottom: 10,
         borderRadius: 8,
         alignItems: 'center',
     },
-    buttonText: { fontWeight: 'bold', color: '#333' },
+
+    buttonText: { fontWeight: 'bold', color: '#E8DFD0' },
+
     input: {
-        borderWidth: 1, borderColor: '#ccc',
-        padding: 10, borderRadius: 5, marginBottom: 15,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#764534',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 15,
+        color: '#333',
     },
+
+    inputActive: {
+        backgroundColor: '#E8DFD0',
+        borderColor: '#764534',
+    },
+
     title: {
-        fontSize: 24, fontWeight: 'bold',
-        textAlign: 'center', marginBottom: 20,
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
     },
+    loginButton: {
+        backgroundColor: '#764534',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+
+    loginButtonText: {
+        color: '#E8DFD0',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
 });

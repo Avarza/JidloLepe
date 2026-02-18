@@ -6,10 +6,12 @@ import {
     Image,
     ScrollView,
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    AppState
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import icons from "@/constants/icons";
 import allergensData from "@/assets/data/allergens.json";
 import { API_BASE_URL } from "@/config/api";
@@ -29,10 +31,12 @@ interface ProductData {
 export default function ProductDetail() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+
     const [productData, setProductData] = useState<ProductData | null>(null);
     const [hasAllergen, setHasAllergen] = useState<boolean | null>(null);
     const [userAllergens, setUserAllergens] = useState<string[]>([]);
     const [overlayVisible, setOverlayVisible] = useState(true);
+    const [loginRequired, setLoginRequired] = useState(false);
 
     // 🥫 Načti data o produktu
     useEffect(() => {
@@ -51,31 +55,52 @@ export default function ProductDetail() {
         if (id) fetchProductData();
     }, [id]);
 
-    // 🧠 Načti alergeny z backendu (JWT)
-    useEffect(() => {
-        const fetchUserAllergens = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                if (!token) return;
+    // 🧠 Kontrola tokenu + načtení alergenů
+    const checkLogin = async () => {
+        const token = await AsyncStorage.getItem("token");
 
-                const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
-                    method: 'GET',
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+        if (!token) {
+            setLoginRequired(true);
+            setUserAllergens([]);
+            setHasAllergen(null);
+            return;
+        }
 
-                if (!response.ok) throw new Error('Chyba při načítání alergenů');
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
+                method: 'GET',
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-                const data: string[] = await response.json();
-                setUserAllergens(data); // např. ["Lepek", "Ryby"]
-            } catch (err) {
-                console.error('❌ Chyba při načítání uživatelských alergenů:', err);
+            if (!response.ok) {
+                setLoginRequired(true);
+                setUserAllergens([]);
+                setHasAllergen(null);
+                return;
             }
-        };
 
-        fetchUserAllergens();
+            const data: string[] = await response.json();
+            setUserAllergens(data);
+            setLoginRequired(false);
+
+        } catch (err) {
+            console.error("Chyba při načítání alergenů:", err);
+            setLoginRequired(true);
+        }
+    };
+
+    // 🔥 Sleduj návrat aplikace do popředí + první načtení
+    useEffect(() => {
+        checkLogin();
+
+        const sub = AppState.addEventListener("change", (state) => {
+            if (state === "active") checkLogin();
+        });
+
+        return () => sub.remove();
     }, []);
 
-    // 🔍 Porovnej složení s alergeny (vícejazyčně)
+    // 🔍 Porovnej složení s alergeny
     useEffect(() => {
         if (!productData || userAllergens.length === 0) return;
 
@@ -93,12 +118,10 @@ export default function ProductDetail() {
 
         const lowerIngredients = ingredients.toLowerCase();
 
-        // 1) Najdi alergeny, které si uživatel vybral
         const selectedAllergens = allergensData.filter(item =>
             userAllergens.includes(item.cz)
         );
 
-        // 2) Vytvoř seznam všech překladů a variant
         const allTerms = selectedAllergens.flatMap(item => {
             const terms = [
                 item.cz,
@@ -112,7 +135,6 @@ export default function ProductDetail() {
             return terms.map(t => t.toLowerCase());
         });
 
-        // 3) Porovnání
         const found = allTerms.some(term => lowerIngredients.includes(term));
 
         setHasAllergen(found);
@@ -128,7 +150,33 @@ export default function ProductDetail() {
 
     return (
         <View style={styles.container}>
-            {overlayVisible && hasAllergen !== null && (
+
+            {/* 🔥 Pokud není uživatel přihlášený */}
+            {loginRequired && (
+                <View style={styles.overlay}>
+                    <Ionicons name="lock-closed" size={50} color="white" />
+                    <Text style={[styles.overlayText, { color: "white" }]}>
+                        Pro zobrazení alergenů se musíte přihlásit.
+                    </Text>
+
+                    <TouchableOpacity
+                        style={styles.loginButton}
+                        onPress={() => router.push("/profile")}
+                    >
+                        <Text style={styles.loginButtonText}>Přejít na přihlášení</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => setLoginRequired(false)}
+                    >
+                        <Ionicons name="close" size={30} color="white" />
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* 🔥 Overlay s výsledkem alergenů */}
+            {overlayVisible && hasAllergen !== null && !loginRequired && (
                 <View style={styles.overlay}>
                     <Image
                         source={hasAllergen ? icons.bad : icons.good}
@@ -194,12 +242,11 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 1,
+        zIndex: 2,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        opacity: 0.9,
     },
     overlayText: {
         fontSize: 18,
@@ -207,10 +254,21 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
+    loginButton: {
+        backgroundColor: "#4CAF50",
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 10,
+        marginTop: 10,
+    },
+    loginButtonText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
     closeButton: {
         position: 'absolute',
         bottom: 20,
-        transform: [{ translateX: -25 }],
     },
     icon: {
         width: 50,

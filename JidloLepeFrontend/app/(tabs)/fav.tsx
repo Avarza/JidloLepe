@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, Alert,
-    StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Button
+    StyleSheet, ScrollView, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { useAuth } from '@/context/authContext';
 import { useRouter } from 'expo-router';
@@ -32,7 +32,6 @@ export default function FavScreen() {
     const [selected, setSelected] = useState<string[]>([]);
     const [search, setSearch] = useState('');
 
-    // 🔄 Načti alergeny z backendu
     useEffect(() => {
         const fetchAllergens = async () => {
             try {
@@ -41,15 +40,13 @@ export default function FavScreen() {
 
                 const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                     method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
 
                 if (!response.ok) throw new Error('Nepodařilo se načíst alergeny');
 
                 const data: string[] = await response.json();
-                setSelected(data); // backend vrací názvy → super
+                setSelected(data);
             } catch (e) {
                 console.error('Chyba při načítání alergenů:', e);
             }
@@ -58,7 +55,6 @@ export default function FavScreen() {
         if (isLoggedIn) fetchAllergens();
     }, [isLoggedIn]);
 
-    // 💾 Ulož alergeny na backend
     const saveAllergens = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -73,22 +69,17 @@ export default function FavScreen() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    email,
-                    allergenIds,
-                }),
+                body: JSON.stringify({ email, allergenIds }),
             });
 
             if (!response.ok) throw new Error('Chyba při ukládání na server');
 
             Alert.alert('Hotovo', 'Alergeny byly uloženy na server');
         } catch (e: any) {
-            console.error('Chyba při ukládání alergenů:', e);
             Alert.alert('Chyba', e.message || 'Nepodařilo se uložit alergeny');
         }
     };
 
-    // 📧 Získání emailu z JWT tokenu
     const getEmailFromToken = (token: string): string => {
         try {
             const base64Url = token.split('.')[1];
@@ -105,7 +96,6 @@ export default function FavScreen() {
         }
     };
 
-    // ✔️ Přepínání alergenů
     const toggleAllergen = (item: string) => {
         setSelected(prev =>
             prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
@@ -116,12 +106,19 @@ export default function FavScreen() {
         a.toLowerCase().includes(search.toLowerCase())
     );
 
-    // ❗ Pokud není přihlášen → nabídni přihlášení
     if (!isLoggedIn) {
         return (
             <View style={styles.centered}>
                 <Text style={styles.info}>Musíte být přihlášeni pro úpravu alergenů.</Text>
-                <Button title="Přejít na přihlášení" onPress={() => router.replace('/(tabs)/profile')} />
+
+                <TouchableOpacity
+                    style={styles.loginButton}
+                    onPress={() => router.replace('/(tabs)/profile')}
+                >
+                    <Text style={styles.loginButtonText}>Přejít na přihlášení</Text>
+                </TouchableOpacity>
+
+
             </View>
         );
     }
@@ -133,6 +130,7 @@ export default function FavScreen() {
         >
             <ScrollView contentContainerStyle={styles.container}>
                 <Text style={styles.title}>Vyber si své alergeny</Text>
+
                 <TextInput
                     placeholder="Hledej..."
                     value={search}
@@ -149,7 +147,9 @@ export default function FavScreen() {
                             selected.includes(item) && styles.selectedItem
                         ]}
                     >
-                        <Text>{selected.includes(item) ? '☑' : '☐'} {item}</Text>
+                        <Text style={styles.allergenText}>
+                            {selected.includes(item) ? '☑' : '☐'} {item}
+                        </Text>
                     </TouchableOpacity>
                 ))}
 
@@ -162,9 +162,9 @@ export default function FavScreen() {
                     )}
                 </View>
 
-                <View style={{ marginTop: 30, paddingBottom: 100 }}>
-                    <Button title="Uložit výběr" onPress={saveAllergens} />
-                </View>
+                <TouchableOpacity style={styles.saveButton} onPress={saveAllergens}>
+                    <Text style={styles.saveButtonText}>Uložit výběr</Text>
+                </TouchableOpacity>
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -176,41 +176,92 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
+        backgroundColor: '#E8DFD0',
     },
+
     info: {
         fontSize: 18,
         marginBottom: 20,
         textAlign: 'center',
     },
+
     container: {
         padding: 20,
         backgroundColor: '#E8DFD0',
     },
+
     title: {
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 10,
+        color: '#764534',
     },
+
     input: {
+        backgroundColor: '#FFFFFF',
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: '#764534',
         borderRadius: 8,
         padding: 10,
         marginBottom: 15,
+        color: '#333',
     },
+
     allergenItem: {
         padding: 12,
         backgroundColor: '#EEE8DA',
         borderRadius: 8,
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#764534',
     },
+
     selectedItem: {
-        backgroundColor: '#d1fae5',
+        backgroundColor: '#E8DFD0',
+        borderColor: '#764534',
     },
+
+    allergenText: {
+        color: '#333',
+        fontSize: 16,
+    },
+
     selectedList: {
         marginTop: 20,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#EEE8DA',
         padding: 12,
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#764534',
+    },
+
+    saveButton: {
+        backgroundColor: '#764534',
+        paddingVertical: 14,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 30,
+        marginBottom: 80,
+    },
+
+    saveButtonText: {
+        color: '#E8DFD0',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
+    loginButton: {
+        backgroundColor: '#764534',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+
+    loginButtonText: {
+        color: '#E8DFD0',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
