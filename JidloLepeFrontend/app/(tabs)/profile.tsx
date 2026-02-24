@@ -137,7 +137,7 @@ export default function ProfileTabScreen() {
         setChangingPw(true);
         try {
             const token = await AsyncStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+            const res = await fetch(`${API_BASE_URL}/api/users/change-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

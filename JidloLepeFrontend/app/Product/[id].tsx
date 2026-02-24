@@ -126,16 +126,42 @@ export default function ProductDetail() {
     const [overlayVisible, setOverlayVisible] = useState(true);
     const [loginRequired, setLoginRequired] = useState(false);
 
-    // ── Fetch product ─────────────────────────────────────────────────────────
+    // ── Fetch product via backend (saves to history when logged in) ──────────
     useEffect(() => {
         if (!id) return;
         (async () => {
             try {
-                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${id}.json`);
-                const data = await res.json();
-                if (data.product) setProductData(data.product);
-            } catch (e) {
-                console.error('Chyba při načítání produktu:', e);
+                const token = await AsyncStorage.getItem('token');
+
+                const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+
+                // Guard: empty or non-JSON response from backend
+                const text = await res.text();
+                if (!text || !text.trim().startsWith('{')) {
+                    throw new Error(`Backend vrátil neplatnou odpověď: ${text.slice(0, 100)}`);
+                }
+
+                const data = JSON.parse(text);
+                if (data.product) {
+                    setProductData(data.product);
+                } else {
+                    throw new Error('Produkt nebyl nalezen v odpovědi');
+                }
+            } catch (backendErr) {
+                console.warn('Backend selhal, zkouším přímo OFF:', backendErr);
+                // Fallback: fetch directly from Open Food Facts
+                try {
+                    const res = await fetch(
+                        `https://world.openfoodfacts.org/api/v0/product/${id}.json`
+                    );
+                    const data = await res.json();
+                    if (data.product) setProductData(data.product);
+                    else console.error('Produkt nenalezen ani v OFF');
+                } catch (offErr) {
+                    console.error('Chyba při načítání produktu z OFF:', offErr);
+                }
             }
         })();
     }, [id]);
