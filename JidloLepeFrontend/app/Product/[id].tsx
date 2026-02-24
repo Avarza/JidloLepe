@@ -1,20 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    Text,
-    View,
-    Image,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    AppState
+    Text, View, Image, ScrollView, TouchableOpacity,
+    AppState, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import icons from "@/constants/icons";
 import allergensData from "@/assets/data/allergens.json";
 import { API_BASE_URL } from "@/config/api";
+
+interface Nutriments {
+    energy_100g?: number;
+    energy_kcal_100g?: number;
+    fat_100g?: number;
+    'saturated-fat_100g'?: number;
+    carbohydrates_100g?: number;
+    sugars_100g?: number;
+    fiber_100g?: number;
+    proteins_100g?: number;
+    salt_100g?: number;
+}
 
 interface ProductData {
     product_name: string;
@@ -26,11 +34,91 @@ interface ProductData {
     ingredients_text_fr?: string | null;
     ingredients_text_pl?: string | null;
     ingredients_text_sk?: string | null;
+    brands?: string;
+    quantity?: string;
+    nutriscore_grade?: string;
+    nutriments?: Nutriments;
+}
+
+// ── Nutri-Score config ────────────────────────────────────────────────────────
+const NUTRISCORE: Record<string, { bg: string; text: string; label: string }> = {
+    a: { bg: '#1E8F4E', text: '#fff', label: 'Výborné' },
+    b: { bg: '#80C040', text: '#fff', label: 'Dobré' },
+    c: { bg: '#FFCC00', text: '#333', label: 'Průměrné' },
+    d: { bg: '#FF8C00', text: '#fff', label: 'Špatné' },
+    e: { bg: '#E63312', text: '#fff', label: 'Velmi špatné' },
+};
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+function LoadingSkeleton() {
+    const shimmer = new Animated.Value(0);
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(shimmer, { toValue: 1, duration: 900, useNativeDriver: true }),
+                Animated.timing(shimmer, { toValue: 0, duration: 900, useNativeDriver: true }),
+            ])
+        ).start();
+    }, []);
+    const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0.85] });
+    return (
+        <Animated.View style={{ opacity }} className="flex-1 bg-[#F5EFE6] px-5 pt-12">
+            <View className="w-2/3 h-6 rounded-full bg-[#E0D4C4] mb-3" />
+            <View className="w-1/3 h-4 rounded-full bg-[#E0D4C4] mb-6" />
+            <View className="w-full h-64 rounded-3xl bg-[#E0D4C4] mb-6" />
+            <View className="w-full h-4 rounded-full bg-[#E0D4C4] mb-2" />
+            <View className="w-5/6 h-4 rounded-full bg-[#E0D4C4] mb-2" />
+            <View className="w-4/6 h-4 rounded-full bg-[#E0D4C4]" />
+        </Animated.View>
+    );
+}
+
+// ── Nutrition row ─────────────────────────────────────────────────────────────
+function NutriRow({ label, value, unit, bold }: { label: string; value?: number; unit: string; bold?: boolean }) {
+    if (value === undefined || value === null) return null;
+    return (
+        <View className={`flex-row justify-between items-center py-2.5 border-b border-[#F0E8DC] ${bold ? 'bg-[#FAF5EF]' : ''}`}>
+            <Text className={`text-sm text-[#5C4033] ${bold ? 'font-bold' : 'pl-4'}`}>{label}</Text>
+            <Text className={`text-sm text-[#3D2314] ${bold ? 'font-bold' : ''}`}>
+                {value % 1 === 0 ? value : value.toFixed(1)} {unit}
+            </Text>
+        </View>
+    );
+}
+
+// ── Nutri-Score visual ────────────────────────────────────────────────────────
+function NutriScoreBar({ grade }: { grade: string }) {
+    const grades = ['a', 'b', 'c', 'd', 'e'];
+    return (
+        <View className="flex-row items-center gap-1">
+            {grades.map(g => {
+                const cfg = NUTRISCORE[g];
+                const active = g === grade;
+                return (
+                    <View
+                        key={g}
+                        style={{
+                            backgroundColor: cfg.bg,
+                            opacity: active ? 1 : 0.25,
+                            paddingHorizontal: active ? 14 : 10,
+                            paddingVertical: active ? 8 : 5,
+                            borderRadius: 8,
+                        }}
+                    >
+                        <Text style={{ color: cfg.text, fontWeight: active ? '900' : '600', fontSize: active ? 15 : 11 }}>
+                            {g.toUpperCase()}
+                        </Text>
+                    </View>
+                );
+            })}
+        </View>
+    );
 }
 
 export default function ProductDetail() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+    const insets = useSafeAreaInsets();
 
     const [productData, setProductData] = useState<ProductData | null>(null);
     const [hasAllergen, setHasAllergen] = useState<boolean | null>(null);
@@ -38,274 +126,236 @@ export default function ProductDetail() {
     const [overlayVisible, setOverlayVisible] = useState(true);
     const [loginRequired, setLoginRequired] = useState(false);
 
-    // 🥫 Načti data o produktu
+    // ── Fetch product ─────────────────────────────────────────────────────────
     useEffect(() => {
-        const fetchProductData = async () => {
+        if (!id) return;
+        (async () => {
             try {
-                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${id}.json`);
-                const data = await response.json();
-                if (data.product) {
-                    setProductData(data.product);
-                }
-            } catch (error) {
-                console.error('Chyba při načítání produktu:', error);
+                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${id}.json`);
+                const data = await res.json();
+                if (data.product) setProductData(data.product);
+            } catch (e) {
+                console.error('Chyba při načítání produktu:', e);
             }
-        };
-
-        if (id) fetchProductData();
+        })();
     }, [id]);
 
-    // 🧠 Kontrola tokenu + načtení alergenů
+    // ── Check login + fetch allergens ─────────────────────────────────────────
     const checkLogin = async () => {
         const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-            setLoginRequired(true);
-            setUserAllergens([]);
-            setHasAllergen(null);
-            return;
-        }
-
+        if (!token) { setLoginRequired(true); setUserAllergens([]); setHasAllergen(null); setOverlayVisible(true); return; }
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
-                method: 'GET',
+            const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
-            if (!response.ok) {
-                setLoginRequired(true);
-                setUserAllergens([]);
-                setHasAllergen(null);
-                return;
-            }
-
-            const data: string[] = await response.json();
-            setUserAllergens(data);
+            if (!res.ok) { setLoginRequired(true); setUserAllergens([]); setHasAllergen(null); setOverlayVisible(true); return; }
+            setUserAllergens(await res.json());
             setLoginRequired(false);
-
-        } catch (err) {
-            console.error("Chyba při načítání alergenů:", err);
-            setLoginRequired(true);
-        }
+        } catch { setLoginRequired(true); }
     };
 
-    // 🔥 Sleduj návrat aplikace do popředí + první načtení
     useEffect(() => {
         checkLogin();
-
-        const sub = AppState.addEventListener("change", (state) => {
-            if (state === "active") checkLogin();
-        });
-
+        const sub = AppState.addEventListener("change", s => { if (s === "active") checkLogin(); });
         return () => sub.remove();
     }, []);
 
-    // 🔍 Porovnej složení s alergeny
+    // ── Match allergens ───────────────────────────────────────────────────────
     useEffect(() => {
         if (!productData || userAllergens.length === 0) return;
-
         const ingredients =
-            productData.ingredients_text_cz ||
-            productData.ingredients_text ||
-            productData.ingredients_text_en ||
-            productData.ingredients_text_de ||
-            productData.ingredients_text_fr ||
-            productData.ingredients_text_pl ||
-            productData.ingredients_text_sk ||
-            null;
-
+            productData.ingredients_text_cz || productData.ingredients_text ||
+            productData.ingredients_text_en || productData.ingredients_text_de ||
+            productData.ingredients_text_fr || productData.ingredients_text_pl ||
+            productData.ingredients_text_sk || null;
         if (!ingredients) return;
-
-        const lowerIngredients = ingredients.toLowerCase();
-
-        const selectedAllergens = allergensData.filter(item =>
-            userAllergens.includes(item.cz)
-        );
-
-        const allTerms = selectedAllergens.flatMap(item => {
-            const terms = [
-                item.cz,
-                ...(item.en || []),
-                ...(item.de || []),
-                ...(item.fr || []),
-                ...(item.pl || []),
-                ...(item.sk || []),
-                ...(item.variants || [])
-            ];
-            return terms.map(t => t.toLowerCase());
-        });
-
-        const found = allTerms.some(term => lowerIngredients.includes(term));
-
+        const lower = ingredients.toLowerCase();
+        const selected = allergensData.filter(item => userAllergens.includes(item.cz));
+        const terms = selected.flatMap(item => [
+            item.cz, ...(item.en || []), ...(item.de || []), ...(item.fr || []),
+            ...(item.pl || []), ...(item.sk || []), ...(item.variants || []),
+        ]).map(t => t.toLowerCase());
+        const found = terms.some(t => lower.includes(t));
         setHasAllergen(found);
+        setOverlayVisible(true); // re-show overlay whenever result changes
     }, [productData, userAllergens]);
 
-    if (!productData) {
-        return (
-            <View style={styles.container}>
-                <Text>Načítání produktu...</Text>
-            </View>
-        );
-    }
+    if (!productData) return <LoadingSkeleton />;
+
+    const ingredients =
+        productData.ingredients_text_cz || productData.ingredients_text ||
+        productData.ingredients_text_en || 'Složení není k dispozici.';
+
+    const nutriGrade = productData.nutriscore_grade?.toLowerCase();
+    const nutriCfg = nutriGrade ? NUTRISCORE[nutriGrade] : null;
+    const n = productData.nutriments ?? {};
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-[#F5EFE6]">
 
-            {/* 🔥 Pokud není uživatel přihlášený */}
+            {/* ── Login overlay ─────────────────────────────────────────────── */}
             {loginRequired && (
-                <View style={styles.overlay}>
+                <View className="absolute inset-0 z-20 bg-black/90 items-center justify-center p-5">
                     <Ionicons name="lock-closed" size={50} color="white" />
-                    <Text style={[styles.overlayText, { color: "white" }]}>
+                    <Text className="text-white text-lg font-bold text-center mb-5 mt-2">
                         Pro zobrazení alergenů se musíte přihlásit.
                     </Text>
-
                     <TouchableOpacity
-                        style={styles.loginButton}
+                        className="bg-[#4CAF50] py-3 px-6 rounded-xl mt-2"
                         onPress={() => router.push("/profile")}
                     >
-                        <Text style={styles.loginButtonText}>Přejít na přihlášení</Text>
+                        <Text className="text-white text-base font-bold">Přejít na přihlášení</Text>
                     </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => setLoginRequired(false)}
-                    >
+                    <TouchableOpacity className="absolute bottom-5" onPress={() => setLoginRequired(false)}>
                         <Ionicons name="close" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
             )}
 
-            {/* 🔥 Overlay s výsledkem alergenů */}
+            {/* ── Allergen result overlay ───────────────────────────────────── */}
             {overlayVisible && hasAllergen !== null && !loginRequired && (
-                <View style={styles.overlay}>
+                <View className="absolute inset-0 z-20 bg-black/90 items-center justify-center p-5">
                     <Image
                         source={hasAllergen ? icons.bad : icons.good}
-                        style={styles.icon}
+                        className="w-12 h-12 mb-5"
+                        resizeMode="contain"
                     />
-                    <Text
-                        style={[
-                            styles.overlayText,
-                            { color: hasAllergen ? 'red' : 'green' },
-                        ]}
-                    >
+                    <Text className={`text-lg font-bold text-center mb-5 ${hasAllergen ? 'text-red-500' : 'text-green-500'}`}>
                         {hasAllergen
                             ? 'Obsahuje alergeny, které jste zadali'
                             : 'Bez alergenů, které jste zadali'}
                     </Text>
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => setOverlayVisible(false)}
-                    >
+                    <TouchableOpacity className="absolute bottom-5" onPress={() => setOverlayVisible(false)}>
                         <Ionicons name="close" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
             )}
 
-            <ScrollView style={styles.productContainer}>
-                <View style={styles.productHeader}>
-                    <Text style={styles.productTitle}>{productData.product_name}</Text>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => router.back()}
-                    >
-                        <Ionicons name="arrow-back" size={30} color="black" />
-                    </TouchableOpacity>
+            {/* ── Back button ───────────────────────────────────────────────── */}
+            <TouchableOpacity
+                className="absolute z-10 left-4 bg-white/80 rounded-full p-2"
+                style={{ top: insets.top + 8 }}
+                onPress={() => router.back()}
+            >
+                <Ionicons name="arrow-back" size={22} color="#764534" />
+            </TouchableOpacity>
+
+            <ScrollView
+                className="flex-1"
+                contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* ── Hero image ────────────────────────────────────────────── */}
+                <View className="bg-white items-center px-8 pb-6" style={{ paddingTop: insets.top + 52 }}>
+                    {productData.image_url ? (
+                        <Image
+                            source={{ uri: productData.image_url }}
+                            className="w-full rounded-2xl"
+                            style={{ height: 260 }}
+                            resizeMode="contain"
+                        />
+                    ) : (
+                        <View className="w-full h-56 rounded-2xl bg-[#F0E8DC] items-center justify-center">
+                            <Text className="text-6xl">🛒</Text>
+                        </View>
+                    )}
                 </View>
 
-                {productData.image_url && (
-                    <Image
-                        source={{ uri: productData.image_url }}
-                        style={styles.productImage}
-                    />
-                )}
+                <View className="px-5 pt-5 gap-4">
 
-                <Text style={styles.sectionTitle}>Složení:</Text>
-                <Text>
-                    {productData.ingredients_text_cz ||
-                        productData.ingredients_text ||
-                        productData.ingredients_text_en ||
-                        'Složení není k dispozici.'}
-                </Text>
+                    {/* ── Name, brand, badges ───────────────────────────────── */}
+                    <View>
+                        <Text className="text-2xl font-extrabold text-[#3D2314] leading-tight">
+                            {productData.product_name || 'Neznámý produkt'}
+                        </Text>
+                        {productData.brands && (
+                            <Text className="text-sm text-[#A08070] mt-1">{productData.brands}</Text>
+                        )}
+
+                        <View className="flex-row flex-wrap gap-2 mt-3">
+                            {productData.quantity && (
+                                <View className="bg-white border border-[#E0D4C4] rounded-full px-3 py-1.5 flex-row items-center gap-1">
+                                    <Text className="text-xs">📦</Text>
+                                    <Text className="text-xs text-[#5C4033] font-medium">{productData.quantity}</Text>
+                                </View>
+                            )}
+                            {hasAllergen !== null && !loginRequired && (
+                                <View className={`rounded-full px-3 py-1.5 flex-row items-center gap-1 ${hasAllergen ? 'bg-red-100' : 'bg-green-100'}`}>
+                                    <Text className="text-xs">{hasAllergen ? '⚠️' : '✅'}</Text>
+                                    <Text className={`text-xs font-bold ${hasAllergen ? 'text-red-600' : 'text-green-700'}`}>
+                                        {hasAllergen ? 'Obsahuje vaše alergeny' : 'Bezpečné pro vás'}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+
+                    {/* ── Nutri-Score card ──────────────────────────────────── */}
+                    {nutriGrade && nutriCfg && (
+                        <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
+                            <Text className="text-base font-bold text-[#3D2314] mb-3">Nutri-Score</Text>
+                            <View className="flex-row items-center justify-between">
+                                <NutriScoreBar grade={nutriGrade} />
+                                <View
+                                    className="rounded-xl px-3 py-1.5 ml-3"
+                                    style={{ backgroundColor: nutriCfg.bg }}
+                                >
+                                    <Text style={{ color: nutriCfg.text }} className="text-xs font-bold">
+                                        {nutriCfg.label}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    )}
+
+                    {/* ── Ingredients ───────────────────────────────────────── */}
+                    <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
+                        <Text className="text-base font-bold text-[#3D2314] mb-3">Složení</Text>
+                        <Text className="text-sm text-[#5C4033] leading-5">{ingredients}</Text>
+                    </View>
+
+                    {/* ── Allergen list ─────────────────────────────────────── */}
+                    {hasAllergen && userAllergens.length > 0 && (
+                        <View className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                            <Text className="text-sm font-bold text-red-700 mb-2">⚠️ Vaše alergeny v tomto produktu</Text>
+                            <View className="flex-row flex-wrap gap-2">
+                                {userAllergens.map(a => (
+                                    <View key={a} className="bg-red-100 rounded-full px-3 py-1">
+                                        <Text className="text-xs font-semibold text-red-700">{a}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
+                    {/* ── Nutrition table ───────────────────────────────────── */}
+                    {productData.nutriments && (
+                        <View className="bg-white rounded-2xl border border-[#EDE3D6] overflow-hidden mb-2">
+                            <View className="px-4 py-3 border-b border-[#F0E8DC]">
+                                <Text className="text-base font-bold text-[#3D2314]">Nutriční hodnoty</Text>
+                                <Text className="text-xs text-[#A08070] mt-0.5">na 100 g / 100 ml</Text>
+                            </View>
+
+                            <View className="px-4 pb-2">
+                                <NutriRow
+                                    label="Energetická hodnota"
+                                    value={n.energy_kcal_100g ?? (n.energy_100g ? Math.round(n.energy_100g / 4.184) : undefined)}
+                                    unit="kcal"
+                                    bold
+                                />
+                                <NutriRow label="Tuky" value={n.fat_100g} unit="g" bold />
+                                <NutriRow label="z toho nasycené mastné kyseliny" value={n['saturated-fat_100g']} unit="g" />
+                                <NutriRow label="Sacharidy" value={n.carbohydrates_100g} unit="g" bold />
+                                <NutriRow label="z toho cukry" value={n.sugars_100g} unit="g" />
+                                <NutriRow label="Vláknina" value={n.fiber_100g} unit="g" bold />
+                                <NutriRow label="Bílkoviny" value={n.proteins_100g} unit="g" bold />
+                                <NutriRow label="Sůl" value={n.salt_100g} unit="g" bold />
+                            </View>
+                        </View>
+                    )}
+
+                </View>
             </ScrollView>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#E8DFD0',
-    },
-    overlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    },
-    overlayText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    loginButton: {
-        backgroundColor: "#4CAF50",
-        paddingVertical: 12,
-        paddingHorizontal: 25,
-        borderRadius: 10,
-        marginTop: 10,
-    },
-    loginButtonText: {
-        color: "white",
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    closeButton: {
-        position: 'absolute',
-        bottom: 20,
-    },
-    icon: {
-        width: 50,
-        height: 50,
-        marginBottom: 20,
-    },
-    productContainer: {
-        padding: 20,
-    },
-    productHeader: {
-        alignItems: 'center',
-        marginBottom: 20,
-        paddingTop: 40,
-        justifyContent: 'center',
-        position: 'relative',
-    },
-    productTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        marginRight: 10,
-        textAlign: 'center',
-    },
-    backButton: {
-        position: 'absolute',
-        top: 0,
-        left: 10,
-    },
-    productImage: {
-        width: '100%',
-        height: 300,
-        resizeMode: 'contain',
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 20,
-    },
-});

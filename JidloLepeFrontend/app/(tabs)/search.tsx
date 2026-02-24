@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Image, TextInput, Pressable, ActivityIndicator } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import icons from "@/constants/icons";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,145 +11,217 @@ interface Product {
     image_front_url?: string;
 }
 
+// ── Skeleton row ──────────────────────────────────────────────────────────────
+function SkeletonRow() {
+    return (
+        <View className="flex-row items-center bg-white rounded-2xl p-3 mb-3 gap-3">
+            <View className="w-16 h-16 rounded-xl bg-[#E8DFD0]" />
+            <View className="flex-1 gap-2">
+                <View className="h-3.5 rounded bg-[#E8DFD0] w-3/4" />
+                <View className="h-3 rounded bg-[#E8DFD0] w-1/2" />
+            </View>
+        </View>
+    );
+}
+
+// ── Product row card ──────────────────────────────────────────────────────────
+function ProductRow({ product, onPress }: { product: Product; onPress: () => void }) {
+    return (
+        <Pressable onPress={onPress}>
+            {({ pressed }) => (
+                <View
+                    className="flex-row items-center bg-white rounded-2xl p-3 mb-3 border border-[#EDE3D6]"
+                    style={{ opacity: pressed ? 0.75 : 1 }}
+                >
+                    {product.image_front_url ? (
+                        <Image
+                            source={{ uri: product.image_front_url }}
+                            className="w-16 h-16 rounded-xl mr-3"
+                            resizeMode="contain"
+                        />
+                    ) : (
+                        <View className="w-16 h-16 rounded-xl mr-3 bg-[#F0E8DC] items-center justify-center">
+                            <Text className="text-2xl">🛒</Text>
+                        </View>
+                    )}
+                    <View className="flex-1">
+                        <Text className="text-[#3D2314] font-semibold text-sm" numberOfLines={2}>
+                            {product.product_name || 'Bez názvu'}
+                        </Text>
+                        <Text className="text-[#A08070] text-xs mt-1">#{product.code}</Text>
+                    </View>
+                    <Text className="text-[#C8B8A2] text-lg ml-2">›</Text>
+                </View>
+            )}
+        </Pressable>
+    );
+}
+
 const Search = () => {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
+    const inputRef = useRef<TextInput>(null);
+
     const [query, setQuery] = useState('');
     const [backendProducts, setBackendProducts] = useState<Product[]>([]);
     const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
-    const insets = useSafeAreaInsets();
+    const [searched, setSearched] = useState(false);
 
-    // 🔥 1) Načti produkty z backendu (stejně jako Home)
     useEffect(() => {
-        const fetchProducts = async () => {
+        (async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/products/`);
-                const data = await response.json();
-
-                if (data.products) {
-                    setBackendProducts(data.products);
-                }
-            } catch (error) {
-                console.error('Chyba při načítání produktů:', error);
+                const res = await fetch(`${API_BASE_URL}/api/products/`);
+                const data = await res.json();
+                if (data.products) setBackendProducts(data.products);
+            } catch (e) {
+                console.error('Chyba při načítání produktů:', e);
             } finally {
                 setLoading(false);
             }
-        };
-
-        fetchProducts();
+        })();
     }, []);
 
-    // 🔍 2) Vyhledávání přes OpenFoodFacts API
     const handleSearch = async () => {
         if (!query.trim()) return;
-
+        inputRef.current?.blur();
         setSearching(true);
         setSearchResults([]);
-
+        setSearched(true);
         try {
-            const response = await fetch(
-                `https://world.openfoodfacts.org/cgi/search.pl?action=process&search_terms=${encodeURIComponent(
-                    query
-                )}&page_size=20&json=true`
+            const res = await fetch(
+                `https://world.openfoodfacts.org/cgi/search.pl?action=process&search_terms=${encodeURIComponent(query)}&page_size=20&json=true`
             );
-
-            const data = await response.json();
+            const data = await res.json();
             setSearchResults(data.products || []);
-        } catch (error) {
-            console.error('Chyba při hledání:', error);
+        } catch (e) {
+            console.error('Chyba při hledání:', e);
         } finally {
             setSearching(false);
         }
     };
 
-    return (
-        <View className="flex-1 bg-accent px-4 pt-10">
+    const clearSearch = () => {
+        setQuery('');
+        setSearchResults([]);
+        setSearched(false);
+    };
 
-            {/* 🔍 Vyhledávací pole */}
-            <View className="flex-row items-center mb-4 bg-primary rounded-full px-4 py-3">
-                <Image source={icons.search} className="w-5 h-5 mr-3" resizeMode="contain" />
-                <TextInput
-                    placeholder="Hledat produkt..."
-                    placeholderTextColor="white"
-                    value={query}
-                    onChangeText={setQuery}
-                    onSubmitEditing={handleSearch}
-                    returnKeyType="search"
-                    className="text-white flex-1"
-                />
+    const showBackend = !query && !loading;
+    const showResults = !!query;
+    const isEmpty = searched && !searching && searchResults.length === 0;
+
+    return (
+        <View className="flex-1 bg-[#F5EFE6]">
+            {/* ── Header ── */}
+            <View
+                className="px-5 pb-4 bg-[#F5EFE6]"
+                style={{ paddingTop: insets.top + 16 }}
+            >
+                <Text className="text-2xl font-extrabold text-[#764534] mb-4 tracking-tight">
+                    Hledat produkty
+                </Text>
+
+                {/* Search input */}
+                <View className="flex-row items-center bg-white rounded-2xl border-2 border-[#D4C4B0] px-4 gap-3">
+                    <Image source={icons.search} className="w-4 h-4 opacity-40" resizeMode="contain" />
+                    <TextInput
+                        ref={inputRef}
+                        placeholder="Název produktu nebo čárový kód…"
+                        placeholderTextColor="#B0A090"
+                        value={query}
+                        onChangeText={(t) => {
+                            setQuery(t);
+                            if (!t) clearSearch();
+                        }}
+                        onSubmitEditing={handleSearch}
+                        returnKeyType="search"
+                        className="flex-1 py-3.5 text-[#3D2314] text-sm"
+                    />
+                    {query.length > 0 && (
+                        <Pressable onPress={clearSearch} className="p-1">
+                            <Text className="text-[#A08070] text-base font-bold">✕</Text>
+                        </Pressable>
+                    )}
+                </View>
+
+                {/* Search button */}
+                <Pressable
+                    onPress={handleSearch}
+                    className="bg-[#764534] rounded-2xl py-3 items-center mt-3"
+                >
+                    <Text className="text-white font-bold text-sm tracking-wide">Hledat</Text>
+                </Pressable>
             </View>
 
-            {/* 🔄 Načítání backend produktů */}
-            {loading && <ActivityIndicator size="large" color="#000" className="mt-10" />}
-
-            {/* 🔄 Načítání výsledků hledání */}
-            {searching && <ActivityIndicator size="large" color="#000" className="mt-10" />}
-
-            {/* ❌ Nic nenalezeno */}
-            {!loading && !searching && query && searchResults.length === 0 && (
-                <Text className="text-center mt-10 text-gray-600">Žádné produkty nenalezeny</Text>
-            )}
-
+            {/* ── Results ── */}
             <ScrollView
-                className="flex-1 px-4 pt-5 bg-accent"
-                contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+                className="flex-1 px-5"
+                contentContainerStyle={{ paddingBottom: insets.bottom + 100, paddingTop: 8 }}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
-                {/* 🛒 3) Pokud není vyhledávání → zobraz backend produkty */}
-                {!query &&
-                    backendProducts.map((product) => {
-                        if (!product.code) return null;
+                {/* Loading backend */}
+                {loading && (
+                    <>
+                        {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+                    </>
+                )}
 
-                        return (
-                            <Pressable
-                                key={product.code}
-                                onPress={() =>
-                                    router.push({ pathname: '/Product/[id]', params: { id: product.code } })
-                                }
-                            >
-                                <View className="mb-5 bg-white p-3 rounded-2xl">
-                                    {product.image_front_url && (
-                                        <Image
-                                            source={{ uri: product.image_front_url }}
-                                            className="w-full h-48 rounded-xl mb-2"
-                                            resizeMode="contain"
-                                        />
-                                    )}
-                                    <Text className="text-lg font-semibold">
-                                        {product.product_name || 'Bez názvu'}
-                                    </Text>
-                                </View>
-                            </Pressable>
-                        );
-                    })}
+                {/* Searching spinner */}
+                {searching && (
+                    <View className="items-center mt-10 gap-3">
+                        <ActivityIndicator size="large" color="#764534" />
+                        <Text className="text-[#A08070] text-sm">Hledám produkty…</Text>
+                    </View>
+                )}
 
-                {/* 🔍 4) Pokud je vyhledávání → zobraz výsledky z OpenFoodFacts */}
-                {query &&
-                    searchResults.map((product) => {
-                        if (!product.code) return null;
+                {/* Empty state */}
+                {isEmpty && (
+                    <View className="items-center mt-16 gap-3">
+                        <Text className="text-4xl">🔍</Text>
+                        <Text className="text-[#3D2314] font-semibold text-base">Nic nenalezeno</Text>
+                        <Text className="text-[#A08070] text-sm text-center">
+                            Zkuste jiný název nebo naskenujte čárový kód
+                        </Text>
+                    </View>
+                )}
 
-                        return (
-                            <Pressable
-                                key={product.code}
-                                onPress={() =>
-                                    router.push({ pathname: '/Product/[id]', params: { id: product.code } })
-                                }
-                            >
-                                <View className="mb-5 bg-white p-3 rounded-2xl">
-                                    {product.image_front_url && (
-                                        <Image
-                                            source={{ uri: product.image_front_url }}
-                                            className="w-full h-48 rounded-xl mb-2"
-                                            resizeMode="contain"
-                                        />
-                                    )}
-                                    <Text className="text-lg font-semibold">
-                                        {product.product_name || 'Bez názvu'}
-                                    </Text>
-                                </View>
-                            </Pressable>
-                        );
-                    })}
+                {/* Section label */}
+                {!searching && (showBackend || (showResults && searchResults.length > 0)) && (
+                    <Text className="text-xs font-semibold text-[#A08070] uppercase tracking-widest mb-3">
+                        {showResults
+                            ? `${searchResults.length} výsledků pro „${query}"`
+                            : `${backendProducts.length} produktů v databázi`}
+                    </Text>
+                )}
+
+                {/* Backend products */}
+                {showBackend &&
+                    backendProducts.map(p =>
+                        p.code ? (
+                            <ProductRow
+                                key={p.code}
+                                product={p}
+                                onPress={() => router.push({ pathname: '/Product/[id]', params: { id: p.code } })}
+                            />
+                        ) : null
+                    )
+                }
+
+                {/* Search results */}
+                {showResults && !searching &&
+                    searchResults.map(p =>
+                        p.code ? (
+                            <ProductRow
+                                key={p.code}
+                                product={p}
+                                onPress={() => router.push({ pathname: '/Product/[id]', params: { id: p.code } })}
+                            />
+                        ) : null
+                    )
+                }
             </ScrollView>
         </View>
     );
