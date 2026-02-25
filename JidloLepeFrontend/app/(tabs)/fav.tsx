@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
-    ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator
+    ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Image
 } from 'react-native';
 import { useAuth } from '@/context/authContext';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from "@/config/api";
+import icons from "@/constants/icons";
 
 const allAllergens = [
     { name: 'Lepek',     emoji: '🌾' },
@@ -116,7 +117,7 @@ export default function FavScreen() {
     if (!isLoggedIn) {
         return (
             <View className="flex-1 items-center justify-center px-8 bg-[#F5EFE6]">
-                <Text className="text-5xl mb-4">🔒</Text>
+                <Image source={icons.login} className="w-16 h-16 mb-4" resizeMode="contain" />
                 <Text className="text-lg text-[#5C4033] text-center mb-6 leading-6">
                     Pro úpravu alergenů se musíte přihlásit.
                 </Text>

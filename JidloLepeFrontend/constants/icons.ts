@@ -15,5 +15,13 @@ export const icons = {
     search_active: require("@/assets/icons/Search_full.png"),
     user: require("@/assets/icons/User.png"),
     user_active: require("@/assets/icons/User_full.png"),
+    login: require("@/assets/icons/Lock.png"),
+    logout: require("@/assets/icons/Logout.png"),
+    camera: require("@/assets/icons/Camera.png"),
+    error: require("@/assets/icons/Error.png"),
+    fiber: require("@/assets/icons/Fiber.png"),
+    changeAvatar: require("@/assets/icons/Photo_Gallery.png"),
+    changePassword: require("@/assets/icons/Key.png"),
+    box: require("@/assets/icons/Box.png"),
 };
 export default icons;

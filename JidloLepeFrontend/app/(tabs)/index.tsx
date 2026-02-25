@@ -1,6 +1,6 @@
 import { Text, View, ScrollView, Image, Pressable, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import SearchBar from "@/components/searchBar";
 import icons from "@/constants/icons";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -264,7 +264,7 @@ export default function Home() {
                         onPress={() => router.push("/scan")}
                         className="bg-[#764534] p-4 rounded-2xl items-center flex-row justify-center gap-3"
                     >
-                        <Text className="text-2xl">📷</Text>
+                        <Image source={icons.camera} className="w-8 h-8" resizeMode="contain" />
                         <View>
                             <Text className="text-white font-bold text-base">Skenovat produkt</Text>
                             <Text className="text-white/60 text-xs">Naskenujte čárový kód</Text>
@@ -351,7 +351,7 @@ export default function Home() {
                 <Text className="font-bold text-[#3D2314] text-base mb-3">Statistiky</Text>
                 <View className="gap-2">
                     <View className="flex-row items-center gap-2">
-                        <Text className="text-lg">📦</Text>
+                        <Image source={icons.box} className="w-4 h-4" resizeMode="contain" />
                         <Text className="text-[#5C4033] text-sm">
                             Produktů v databázi: <Text className="font-bold">{products.length}</Text>
                         </Text>
@@ -366,7 +366,7 @@ export default function Home() {
                     )}
                     {userAllergens.length > 0 && (
                         <View className="flex-row items-center gap-2">
-                            <Text className="text-lg">⚠️</Text>
+                            <Image source={icons.error} className="w-4 h-4" resizeMode="contain" />
                             <Text className="text-[#5C4033] text-sm">
                                 Sledované alergeny: <Text className="font-bold">{userAllergens.length}</Text>
                             </Text>

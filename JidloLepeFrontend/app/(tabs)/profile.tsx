@@ -10,7 +10,18 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import icons from '@/constants/icons';
 import { API_BASE_URL } from "@/config/api";
+
+// Deduplicate history by code, keeping most recent occurrence
+function deduplicateHistory(items: HistoryProduct[]): HistoryProduct[] {
+    const seen = new Set<string>();
+    return items.filter(p => {
+        if (seen.has(p.code)) return false;
+        seen.add(p.code);
+        return true;
+    });
+}
 
 interface HistoryProduct {
     code: string;
@@ -31,7 +42,7 @@ function AllergenChip({ name }: { name: string }) {
 function ActionRow({
                        icon, label, onPress, danger,
                    }: {
-    icon: string; label: string; onPress: () => void; danger?: boolean;
+    icon: any; label: string; onPress: () => void; danger?: boolean;
 }) {
     return (
         <TouchableOpacity
@@ -42,7 +53,11 @@ function ActionRow({
                     : 'bg-white border-[#EDE3D6]'
             }`}
         >
-            <Text className="text-xl mr-3">{icon}</Text>
+            <Image
+                source={icon}
+                style={{ width: 22, height: 22, marginRight: 12, tintColor: danger ? '#DC2626' : '#764534' }}
+                resizeMode="contain"
+            />
             <Text className={`flex-1 font-semibold text-sm ${danger ? 'text-red-600' : 'text-[#3D2314]'}`}>
                 {label}
             </Text>
@@ -137,7 +152,7 @@ export default function ProfileTabScreen() {
         setChangingPw(true);
         try {
             const token = await AsyncStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/users/change-password`, {
+            const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +179,7 @@ export default function ProfileTabScreen() {
             return;
         }
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'] as any,
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.8,
@@ -208,11 +223,13 @@ export default function ProfileTabScreen() {
                 const data = await res.json();
                 // Expected: [{ code, product_name, image_front_url }]
                 setHistory(
-                    (data.products ?? data).map((p: any) => ({
-                        code: p.code,
-                        name: p.product_name ?? p.name,
-                        image: p.image_front_url ?? p.image,
-                    }))
+                    deduplicateHistory(
+                        (data.products ?? data).map((p: any) => ({
+                            code: p.code,
+                            name: p.product_name ?? p.name,
+                            image: p.image_front_url ?? p.image,
+                        }))
+                    )
                 );
             } catch {
                 // Fallback: load from AsyncStorage recent_products
@@ -220,11 +237,11 @@ export default function ProfileTabScreen() {
                     const stored = await AsyncStorage.getItem('recent_products');
                     if (stored) {
                         const parsed = JSON.parse(stored);
-                        setHistory(parsed.map((p: any) => ({
+                        setHistory(deduplicateHistory(parsed.map((p: any) => ({
                             code: p.code,
                             name: p.product_name ?? p.name,
                             image: p.image_front_url ?? p.image ?? '',
-                        })));
+                        }))));
                     }
                 } catch {}
             } finally {
@@ -358,9 +375,9 @@ export default function ProfileTabScreen() {
                             </Text>
                         ) : (
                             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                {history.map(product => (
+                                {history.map((product, index) => (
                                     <TouchableOpacity
-                                        key={product.code}
+                                        key={`${product.code}-${index}`}
                                         className="mr-4 items-center"
                                         style={{ width: 90 }}
                                         onPress={() => router.push({
@@ -443,10 +460,10 @@ export default function ProfileTabScreen() {
                         <Text className="text-xs font-semibold text-[#A08070] uppercase tracking-widest mb-3">
                             Nastavení účtu
                         </Text>
-                        <ActionRow icon="🔐" label="Změnit heslo" onPress={() => setShowPwForm(v => !v)} />
-                        <ActionRow icon="🌾" label="Upravit alergeny" onPress={() => router.push('/(tabs)/fav')} />
-                        <ActionRow icon="🖼️" label="Změnit avatar" onPress={handleChangeAvatar} />
-                        <ActionRow icon="🚪" label="Odhlásit se" onPress={handleLogout} danger />
+                        <ActionRow icon={icons.changePassword} label="Změnit heslo" onPress={() => setShowPwForm(v => !v)} />
+                        <ActionRow icon={icons.fiber} label="Upravit alergeny" onPress={() => router.push('/(tabs)/fav')} />
+                        <ActionRow icon={icons.changeAvatar} label="Změnit avatar" onPress={handleChangeAvatar} />
+                        <ActionRow icon={icons.logout} label="Odhlásit se" onPress={handleLogout} danger />
                     </View>
 
                 </View>
