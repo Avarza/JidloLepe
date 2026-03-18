@@ -12,23 +12,73 @@ interface Product {
     code: string;
     product_name: string;
     image_front_url?: string;
-    allergens?: string[]; // list of allergen names on the product
+    allergens?: string[];
 }
 
-// Maps allergen names to emoji for quick visual badges
+// ── Všech 14 EU alergenů ──────────────────────────────────────────────────────
 const allergenEmoji: Record<string, string> = {
-    Lepek: '🌾', Mléko: '🥛', Ořechy: '🥜', Sója: '🫘',
-    Vejce: '🥚', Ryby: '🐟', Celer: '🥬', Hořčice: '🌿',
-    Sezam: '🌱', Skořápky: '🦐',
+    'Lepek':              '🌾',
+    'Korýši':             '🦐',
+    'Vejce':              '🥚',
+    'Ryby':               '🐟',
+    'Arašídy':            '🥜',
+    'Sója':               '🫘',
+    'Mléko':              '🥛',
+    'Skořápkové ořechy':  '🌰',
+    'Celer':              '🥬',
+    'Hořčice':            '🌿',
+    'Sezam':              '🌱',
+    'Oxid siřičitý':      '🧪',
+    'Vlčí bob':           '🌸',
+    'Měkkýši':            '🐚',
 };
 
-// Returns allergens on a product that the user is allergic to
+// ── Mapování OFF tagů → české názvy (všech 14) ────────────────────────────────
+const tagToName: Record<string, string> = {
+    'en:gluten':          'Lepek',
+    'en:wheat':           'Lepek',
+    'en:rye':             'Lepek',
+    'en:barley':          'Lepek',
+    'en:oats':            'Lepek',
+    'en:crustaceans':     'Korýši',
+    'en:crustacean':      'Korýši',
+    'en:eggs':            'Vejce',
+    'en:egg':             'Vejce',
+    'en:fish':            'Ryby',
+    'en:peanuts':         'Arašídy',
+    'en:peanut':          'Arašídy',
+    'en:soybeans':        'Sója',
+    'en:soya':            'Sója',
+    'en:soy':             'Sója',
+    'en:milk':            'Mléko',
+    'en:lactose':         'Mléko',
+    'en:nuts':            'Skořápkové ořechy',
+    'en:almonds':         'Skořápkové ořechy',
+    'en:hazelnuts':       'Skořápkové ořechy',
+    'en:walnuts':         'Skořápkové ořechy',
+    'en:cashews':         'Skořápkové ořechy',
+    'en:pecans':          'Skořápkové ořechy',
+    'en:brazil-nuts':     'Skořápkové ořechy',
+    'en:pistachios':      'Skořápkové ořechy',
+    'en:macadamia-nuts':  'Skořápkové ořechy',
+    'en:celery':          'Celer',
+    'en:mustard':         'Hořčice',
+    'en:sesame-seeds':    'Sezam',
+    'en:sesame':          'Sezam',
+    'en:sulphur-dioxide': 'Oxid siřičitý',
+    'en:sulphites':       'Oxid siřičitý',
+    'en:sulfites':        'Oxid siřičitý',
+    'en:lupin':           'Vlčí bob',
+    'en:molluscs':        'Měkkýši',
+    'en:mollusks':        'Měkkýši',
+};
+
 function getDangerousAllergens(product: Product, userAllergens: string[]): string[] {
     if (!product.allergens || userAllergens.length === 0) return [];
     return product.allergens.filter(a => userAllergens.includes(a));
 }
 
-// ── Skeleton card ────────────────────────────────────────────────────────────
+// ── Skeleton card ─────────────────────────────────────────────────────────────
 function SkeletonCard() {
     const shimmer = useRef(new Animated.Value(0)).current;
     useEffect(() => {
@@ -49,7 +99,7 @@ function SkeletonCard() {
     );
 }
 
-// ── Product card ─────────────────────────────────────────────────────────────
+// ── Product card ──────────────────────────────────────────────────────────────
 function ProductCard({
                          product,
                          userAllergens,
@@ -59,7 +109,7 @@ function ProductCard({
     userAllergens: string[];
     onPress: () => void;
 }) {
-    const dangerous = getDangerousAllergens(product, userAllergens);
+    const dangerous = [...new Set(getDangerousAllergens(product, userAllergens))];
     const hasWarning = dangerous.length > 0;
 
     return (
@@ -68,7 +118,6 @@ function ProductCard({
                 className={`p-4 rounded-2xl w-48 border-2 ${hasWarning ? 'bg-red-50 border-red-300' : 'bg-white border-transparent'}`}
                 style={{ height: 270 }}
             >
-                {/* Warning banner — fixed height so cards without it still align */}
                 <View className="h-7 mb-2 justify-center">
                     {hasWarning && (
                         <View className="bg-red-500 rounded-lg px-2 py-1 self-start flex-row items-center">
@@ -90,7 +139,6 @@ function ProductCard({
                     </View>
                 )}
 
-                {/* Name — always 2 lines worth of space */}
                 <Text
                     className="font-semibold text-[#3D2314] text-sm flex-1"
                     numberOfLines={2}
@@ -99,10 +147,9 @@ function ProductCard({
                     {product.product_name || 'Bez názvu'}
                 </Text>
 
-                {/* Allergen emoji badges pinned to bottom */}
                 <View className="flex-row flex-wrap gap-1 mt-1" style={{ minHeight: 20 }}>
-                    {hasWarning && dangerous.map(a => (
-                        <View key={a} className="bg-red-100 rounded-full px-1.5 py-0.5">
+                    {hasWarning && dangerous.map((a, i) => (
+                        <View key={`${a}-${i}`} className="bg-red-100 rounded-full px-1.5 py-0.5">
                             <Text className="text-xs">{allergenEmoji[a] ?? '⚠️'} {a}</Text>
                         </View>
                     ))}
@@ -136,7 +183,6 @@ export default function Home() {
     const [loadingRecommended, setLoadingRecommended] = useState(true);
     const [userAllergens, setUserAllergens] = useState<string[]>([]);
 
-    // Pulse animation for scan button
     const pulse = useRef(new Animated.Value(1)).current;
     useEffect(() => {
         Animated.loop(
@@ -168,11 +214,9 @@ export default function Home() {
         })();
     }, []);
 
-    // Fetch random popular products from Open Food Facts
     useEffect(() => {
         (async () => {
             try {
-                // Use a random page (1–50) of popular products for variety each visit
                 const randomPage = Math.floor(Math.random() * 50) + 1;
                 const url =
                     `https://world.openfoodfacts.org/api/v2/search` +
@@ -180,7 +224,7 @@ export default function Home() {
                     `&page=${randomPage}` +
                     `&page_size=10` +
                     `&fields=code,product_name,image_front_url,allergens_tags` +
-                    `&countries_tags=en:czechia`;   // bias toward Czech products; remove if you want global
+                    `&countries_tags=en:czechia`;
 
                 const res = await fetch(url, {
                     headers: { 'User-Agent': 'AllergenChecker/1.0 (your@email.com)' },
@@ -188,29 +232,17 @@ export default function Home() {
                 const data = await res.json();
 
                 if (data.products) {
-                    // Normalise allergens_tags ("en:gluten" → "Lepek") using a lookup
-                    const tagToName: Record<string, string> = {
-                        'en:gluten': 'Lepek',
-                        'en:milk': 'Mléko',
-                        'en:nuts': 'Ořechy',
-                        'en:soybeans': 'Sója',
-                        'en:eggs': 'Vejce',
-                        'en:fish': 'Ryby',
-                        'en:celery': 'Celer',
-                        'en:mustard': 'Hořčice',
-                        'en:sesame-seeds': 'Sezam',
-                        'en:crustaceans': 'Skořápky',
-                    };
-
                     const normalised: Product[] = data.products
                         .filter((p: any) => p.product_name && p.image_front_url)
                         .map((p: any) => ({
                             code: p.code,
                             product_name: p.product_name,
                             image_front_url: p.image_front_url,
-                            allergens: (p.allergens_tags ?? [])
-                                .map((tag: string) => tagToName[tag])
-                                .filter(Boolean),
+                            allergens: [...new Set(
+                                (p.allergens_tags ?? [])
+                                    .map((tag: string) => tagToName[tag])
+                                    .filter(Boolean)
+                            )] as string[],
                         }));
 
                     setRecommended(normalised);
@@ -235,7 +267,6 @@ export default function Home() {
         })();
     }, [isLoggedIn]);
 
-    // Count how many recommended products contain user allergens
     const warningCount = recommended.filter(
         p => getDangerousAllergens(p, userAllergens).length > 0
     ).length;
@@ -247,18 +278,15 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
         >
             <View className="px-5">
-                {/* Logo + greeting */}
                 <View className="flex-row items-center justify-center mb-5">
-                    <Image source={icons.logo} className="w-12 h-10" />
+                    <Image source={icons.logo} className="w-32 mt-2 mx-auto" resizeMode="contain" />
                 </View>
 
-                {/* Search */}
                 <SearchBar
                     onPress={() => router.push("/(tabs)/search")}
                     placeholder="Hledej produkty…"
                 />
 
-                {/* Scan button — animated pulse */}
                 <Animated.View className="mt-4">
                     <Pressable
                         onPress={() => router.push("/scan")}
@@ -272,7 +300,6 @@ export default function Home() {
                     </Pressable>
                 </Animated.View>
 
-                {/* Allergen warning summary banner */}
                 {isLoggedIn && userAllergens.length > 0 && warningCount > 0 && (
                     <View className="mt-4 bg-red-50 border border-red-200 rounded-2xl p-4 flex-row items-start gap-3">
                         <Text className="text-2xl">⚠️</Text>
@@ -285,7 +312,6 @@ export default function Home() {
                     </View>
                 )}
 
-                {/* My allergens */}
                 {isLoggedIn && (
                     <View className="mt-6 bg-white rounded-2xl p-4 border border-[#E8DFD0]">
                         <View className="flex-row items-center justify-between mb-3">
@@ -307,7 +333,6 @@ export default function Home() {
                 )}
             </View>
 
-            {/* Recommended products */}
             <View className="mt-10">
                 <Text className="text-xl font-bold text-[#3D2314] px-5 mb-4">
                     Doporučené produkty
@@ -315,9 +340,9 @@ export default function Home() {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="px-5 gap-4">
                     {loadingRecommended
                         ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-                        : recommended.map(p => (
+                        : recommended.map((p, i) => (
                             <ProductCard
-                                key={p.code}
+                                key={`${p.code}-${i}`}
                                 product={p}
                                 userAllergens={userAllergens}
                                 onPress={() => router.push({ pathname: '/Product/[id]', params: { id: p.code } })}
@@ -327,16 +352,15 @@ export default function Home() {
                 </ScrollView>
             </View>
 
-            {/* Recently viewed */}
             {recent.length > 0 && (
                 <View className="mt-8">
                     <Text className="text-xl font-bold text-[#3D2314] px-5 mb-3">
                         Naposledy prohlížené
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="px-5">
-                        {recent.map(p => (
+                        {recent.map((p, i) => (
                             <ProductCard
-                                key={p.code}
+                                key={`${p.code}-recent-${i}`}
                                 product={p}
                                 userAllergens={userAllergens}
                                 onPress={() => router.push({ pathname: '/Product/[id]', params: { id: p.code } })}
@@ -346,7 +370,6 @@ export default function Home() {
                 </View>
             )}
 
-            {/* Stats */}
             <View className="mx-5 mt-8 bg-white rounded-2xl p-4 border border-[#E8DFD0]">
                 <Text className="font-bold text-[#3D2314] text-base mb-3">Statistiky</Text>
                 <View className="gap-2">

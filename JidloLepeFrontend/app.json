@@ -12,13 +12,15 @@
       "supportsTablet": true
     },
     "android": {
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/Logo.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        ["INTERNET"]
       ],
       "package": "com.avarza.JidloLepe"
     },
