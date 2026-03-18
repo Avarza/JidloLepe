@@ -75,6 +75,13 @@ export default function ProfileTabScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loggingIn, setLoggingIn] = useState(false);
+    const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
+
+    // Register form
+    const [regEmail, setRegEmail] = useState('');
+    const [regPassword, setRegPassword] = useState('');
+    const [regConfirm, setRegConfirm] = useState('');
+    const [registering, setRegistering] = useState(false);
 
     // Profile data
     const [userEmail, setUserEmail] = useState('');
@@ -114,6 +121,39 @@ export default function ProfileTabScreen() {
             Alert.alert('Chyba přihlášení', e.message || 'Neznámá chyba');
         } finally {
             setLoggingIn(false);
+        }
+    };
+
+    // ── Register ──────────────────────────────────────────────────────────────
+    const handleRegister = async () => {
+        if (!regEmail.trim() || !regPassword.trim() || !regConfirm.trim()) {
+            Alert.alert('Chyba', 'Vyplňte všechna pole.');
+            return;
+        }
+        if (regPassword !== regConfirm) {
+            Alert.alert('Chyba', 'Hesla se neshodují.');
+            return;
+        }
+        if (regPassword.length < 6) {
+            Alert.alert('Chyba', 'Heslo musí mít alespoň 6 znaků.');
+            return;
+        }
+        setRegistering(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: regEmail, password: regPassword }),
+            });
+            if (!res.ok) throw new Error((await res.text()) || 'Registrace selhala');
+            const data = await res.json();
+            await AsyncStorage.setItem('token', data.token);
+            setUserEmail(regEmail);
+            login();
+        } catch (e: any) {
+            Alert.alert('Chyba registrace', e.message || 'Neznámá chyba');
+        } finally {
+            setRegistering(false);
         }
     };
 
@@ -258,48 +298,138 @@ export default function ProfileTabScreen() {
                     contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 28 }}
                     keyboardShouldPersistTaps="handled"
                 >
-                    <Text className="text-3xl font-extrabold text-[#764534] text-center mb-1">
-                        Vítejte zpět
-                    </Text>
-                    <Text className="text-sm text-[#A08070] text-center mb-8">
-                        Přihlaste se ke svému účtu
-                    </Text>
+                    {/* Logo */}
+                    <Image source={icons.logo} className="w-32 mx-auto mb-6" resizeMode="contain" />
 
-                    <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-3 flex-row items-center">
-                        <Ionicons name="mail-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
-                        <TextInput
-                            placeholder="Email"
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                            placeholderTextColor="#B0A090"
-                            className="flex-1 py-4 text-[#3D2314] text-sm"
-                        />
+                    {/* Tab switcher */}
+                    <View className="flex-row bg-[#EDE3D6] rounded-2xl p-1 mb-8">
+                        <TouchableOpacity
+                            className={`flex-1 py-2.5 rounded-xl items-center ${authTab === 'login' ? 'bg-white' : ''}`}
+                            onPress={() => setAuthTab('login')}
+                        >
+                            <Text className={`font-bold text-sm ${authTab === 'login' ? 'text-[#764534]' : 'text-[#A08070]'}`}>
+                                Přihlášení
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            className={`flex-1 py-2.5 rounded-xl items-center ${authTab === 'register' ? 'bg-white' : ''}`}
+                            onPress={() => setAuthTab('register')}
+                        >
+                            <Text className={`font-bold text-sm ${authTab === 'register' ? 'text-[#764534]' : 'text-[#A08070]'}`}>
+                                Registrace
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
-                    <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-6 flex-row items-center">
-                        <Ionicons name="lock-closed-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
-                        <TextInput
-                            placeholder="Heslo"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            placeholderTextColor="#B0A090"
-                            className="flex-1 py-4 text-[#3D2314] text-sm"
-                        />
-                    </View>
+                    {authTab === 'login' ? (
+                        /* ── Login form ── */
+                        <View>
+                            <Text className="text-2xl font-extrabold text-[#764534] mb-1">Vítejte zpět</Text>
+                            <Text className="text-sm text-[#A08070] mb-6">Přihlaste se ke svému účtu</Text>
 
-                    <TouchableOpacity
-                        className="bg-[#764534] rounded-2xl py-4 items-center"
-                        onPress={handleLogin}
-                        disabled={loggingIn}
-                    >
-                        {loggingIn
-                            ? <ActivityIndicator color="white" />
-                            : <Text className="text-white font-bold text-base">Přihlásit se</Text>
-                        }
-                    </TouchableOpacity>
+                            <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-3 flex-row items-center">
+                                <Ionicons name="mail-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
+                                <TextInput
+                                    placeholder="Email"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    placeholderTextColor="#B0A090"
+                                    className="flex-1 py-4 text-[#3D2314] text-sm"
+                                />
+                            </View>
+
+                            <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-6 flex-row items-center">
+                                <Ionicons name="lock-closed-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
+                                <TextInput
+                                    placeholder="Heslo"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                    placeholderTextColor="#B0A090"
+                                    className="flex-1 py-4 text-[#3D2314] text-sm"
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                className="bg-[#764534] rounded-2xl py-4 items-center"
+                                onPress={handleLogin}
+                                disabled={loggingIn}
+                            >
+                                {loggingIn
+                                    ? <ActivityIndicator color="white" />
+                                    : <Text className="text-white font-bold text-base">Přihlásit se</Text>
+                                }
+                            </TouchableOpacity>
+
+                            <TouchableOpacity className="mt-4 items-center" onPress={() => setAuthTab('register')}>
+                                <Text className="text-[#A08070] text-sm">
+                                    Nemáte účet? <Text className="text-[#764534] font-bold">Zaregistrujte se</Text>
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        /* ── Register form ── */
+                        <View>
+                            <Text className="text-2xl font-extrabold text-[#764534] mb-1">Vytvořit účet</Text>
+                            <Text className="text-sm text-[#A08070] mb-6">Zaregistrujte se zdarma</Text>
+
+                            <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-3 flex-row items-center">
+                                <Ionicons name="mail-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
+                                <TextInput
+                                    placeholder="Email"
+                                    value={regEmail}
+                                    onChangeText={setRegEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    placeholderTextColor="#B0A090"
+                                    className="flex-1 py-4 text-[#3D2314] text-sm"
+                                />
+                            </View>
+
+                            <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-3 flex-row items-center">
+                                <Ionicons name="lock-closed-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
+                                <TextInput
+                                    placeholder="Heslo (min. 6 znaků)"
+                                    value={regPassword}
+                                    onChangeText={setRegPassword}
+                                    secureTextEntry
+                                    placeholderTextColor="#B0A090"
+                                    className="flex-1 py-4 text-[#3D2314] text-sm"
+                                />
+                            </View>
+
+                            <View className="bg-white rounded-2xl border border-[#EDE3D6] px-4 mb-6 flex-row items-center">
+                                <Ionicons name="lock-closed-outline" size={18} color="#A08070" style={{ marginRight: 10 }} />
+                                <TextInput
+                                    placeholder="Potvrdit heslo"
+                                    value={regConfirm}
+                                    onChangeText={setRegConfirm}
+                                    secureTextEntry
+                                    placeholderTextColor="#B0A090"
+                                    className="flex-1 py-4 text-[#3D2314] text-sm"
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                className="bg-[#764534] rounded-2xl py-4 items-center"
+                                onPress={handleRegister}
+                                disabled={registering}
+                            >
+                                {registering
+                                    ? <ActivityIndicator color="white" />
+                                    : <Text className="text-white font-bold text-base">Zaregistrovat se</Text>
+                                }
+                            </TouchableOpacity>
+
+                            <TouchableOpacity className="mt-4 items-center" onPress={() => setAuthTab('login')}>
+                                <Text className="text-[#A08070] text-sm">
+                                    Máte účet? <Text className="text-[#764534] font-bold">Přihlaste se</Text>
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </ScrollView>
             </View>
         );
