@@ -1,92 +1,128 @@
 [
   {
     "cz": "Lepek",
-    "en": ["gluten", "wheat"],
-    "de": ["weizen", "glutenhaltig"],
-    "fr": ["gluten"],
-    "pl": ["gluten"],
-    "sk": ["glutén"],
-    "variants": ["gliadin", "gluten protein"]
+    "en": ["gluten", "wheat", "rye", "barley", "oat", "spelt", "kamut"],
+    "de": ["weizen", "roggen", "gerste", "hafer", "dinkel", "glutenhaltig", "gluten"],
+    "fr": ["gluten", "blé", "seigle", "orge", "avoine", "épeautre"],
+    "pl": ["gluten", "pszenica", "żyto", "jęczmień", "owies", "orkisz"],
+    "sk": ["glutén", "pšenica", "raž", "jačmeň", "ovos", "špalda"],
+    "variants": ["gliadin", "gluten protein", "wheat flour", "wheat starch", "wheat protein", "wheat germ"]
   },
   {
-    "cz": "Mléko",
-    "en": ["milk", "lactose", "casein"],
-    "de": ["milch", "laktose", "kasein"],
-    "fr": ["lait", "lactose"],
-    "pl": ["mleko", "laktoza"],
-    "sk": ["mlieko", "laktóza"],
-    "variants": ["milk powder", "skimmed milk"]
-  },
-  {
-    "cz": "Ořechy",
-    "en": ["nuts", "walnut", "almond", "hazelnut"],
-    "de": ["nüsse", "walnuss", "mandel", "haselnuss"],
-    "fr": ["noix", "amande", "noisette"],
-    "pl": ["orzechy"],
-    "sk": ["orechy"],
-    "variants": ["nut traces"]
-  },
-  {
-    "cz": "Sója",
-    "en": ["soy", "soya", "soybean"],
-    "de": ["soja"],
-    "fr": ["soja"],
-    "pl": ["soja"],
-    "sk": ["sója"],
-    "variants": ["soy protein", "soy lecithin"]
+    "cz": "Korýši",
+    "en": ["crustaceans", "crab", "lobster", "shrimp", "prawn", "crayfish", "langoustine"],
+    "de": ["krebstiere", "krabbe", "hummer", "garnele", "scampi"],
+    "fr": ["crustacés", "crabe", "homard", "crevette", "langouste"],
+    "pl": ["skorupiaki", "krab", "homar", "krewetka"],
+    "sk": ["kôrovce", "krab", "homár", "kreveta"],
+    "variants": ["shrimp extract", "prawn", "king prawn"]
   },
   {
     "cz": "Vejce",
-    "en": ["egg", "eggs", "albumin"],
-    "de": ["ei", "eier", "eiweiß"],
-    "fr": ["oeuf"],
-    "pl": ["jajko"],
-    "sk": ["vajce"],
-    "variants": ["egg powder"]
+    "en": ["egg", "eggs", "albumin", "ovalbumin", "lysozyme", "mayonnaise"],
+    "de": ["ei", "eier", "eiweiß", "eigelb", "lysozym"],
+    "fr": ["oeuf", "oeufs", "albumine", "lysozyme"],
+    "pl": ["jajko", "jaja", "albumina", "lizozym"],
+    "sk": ["vajce", "vajcia", "albumín", "lyzozým"],
+    "variants": ["egg powder", "dried egg", "egg white", "egg yolk", "whole egg"]
   },
   {
     "cz": "Ryby",
-    "en": ["fish", "salmon", "tuna"],
-    "de": ["fisch"],
-    "fr": ["poisson"],
-    "pl": ["ryba"],
-    "sk": ["ryby"],
-    "variants": ["fish oil"]
+    "en": ["fish", "salmon", "tuna", "cod", "herring", "anchovy", "sardine", "trout", "bass"],
+    "de": ["fisch", "lachs", "thunfisch", "kabeljau", "hering", "sardine"],
+    "fr": ["poisson", "saumon", "thon", "cabillaud", "hareng", "anchois"],
+    "pl": ["ryba", "ryby", "łosoś", "tuńczyk", "dorsz", "śledź"],
+    "sk": ["ryba", "ryby", "losos", "tuniak", "treska", "sleď"],
+    "variants": ["fish oil", "fish sauce", "fish extract", "fish gelatin", "surimi"]
+  },
+  {
+    "cz": "Arašídy",
+    "en": ["peanut", "peanuts", "groundnut", "groundnuts", "arachis oil"],
+    "de": ["erdnuss", "erdnüsse", "arachisöl"],
+    "fr": ["arachide", "arachides", "cacahuète", "huile d'arachide"],
+    "pl": ["orzech ziemny", "orzeszki ziemne", "arachidy"],
+    "sk": ["arašid", "arašidy", "podzemnica olejná"],
+    "variants": ["peanut butter", "peanut oil", "peanut flour", "peanut protein", "monkey nuts"]
+  },
+  {
+    "cz": "Sója",
+    "en": ["soy", "soya", "soybean", "soy bean", "tofu", "tempeh", "miso", "edamame"],
+    "de": ["soja", "sojaöl", "sojaprotein", "tofu"],
+    "fr": ["soja", "soya", "tofu", "tempeh"],
+    "pl": ["soja", "białko sojowe", "tofu"],
+    "sk": ["sója", "sójové bôby", "tofu"],
+    "variants": ["soy protein", "soy lecithin", "soy sauce", "soy flour", "textured soy protein"]
+  },
+  {
+    "cz": "Mléko",
+    "en": ["milk", "lactose", "casein", "whey", "butter", "cream", "cheese", "yogurt", "ghee"],
+    "de": ["milch", "laktose", "kasein", "molke", "butter", "sahne", "käse"],
+    "fr": ["lait", "lactose", "caséine", "lactosérum", "beurre", "crème", "fromage"],
+    "pl": ["mleko", "laktoza", "kazeina", "serwatka", "masło", "śmietana", "ser"],
+    "sk": ["mlieko", "laktóza", "kazeín", "srvátka", "maslo", "smotana", "syr"],
+    "variants": ["milk powder", "skimmed milk", "dried milk", "milk solids", "milk protein", "lactalbumin"]
+  },
+  {
+    "cz": "Skořápkové ořechy",
+    "en": ["nuts", "almond", "hazelnut", "walnut", "cashew", "pecan", "brazil nut", "pistachio", "macadamia", "queensland nut"],
+    "de": ["nüsse", "mandel", "haselnuss", "walnuss", "cashew", "pekannuss", "paranuss", "pistazie", "macadamia"],
+    "fr": ["noix", "amande", "noisette", "noix de cajou", "noix de pécan", "noix du brésil", "pistache", "macadamia"],
+    "pl": ["orzechy", "migdał", "orzech laskowy", "orzech włoski", "nerkowiec", "orzech pekan", "orzech brazylijski", "pistacja", "makadamia"],
+    "sk": ["orechy", "mandľa", "lieskový orech", "vlašský orech", "kešu", "pekanový orech", "para orech", "pistácia", "makadamia"],
+    "variants": ["nut traces", "mixed nuts", "nut oil", "almond flour", "marzipan", "praline", "nut butter"]
   },
   {
     "cz": "Celer",
-    "en": ["celery"],
-    "de": ["sellerie"],
-    "fr": ["céleri"],
-    "pl": ["seler"],
-    "sk": ["zeler"],
-    "variants": []
+    "en": ["celery", "celeriac", "celery seed", "celery salt"],
+    "de": ["sellerie", "selleriesalz", "selleriesamen"],
+    "fr": ["céleri", "céleri-rave", "sel de céleri"],
+    "pl": ["seler", "seler naciowy", "sól selerowa"],
+    "sk": ["zeler", "zelerová soľ"],
+    "variants": ["celery extract", "celery oil", "celery powder"]
   },
   {
     "cz": "Hořčice",
-    "en": ["mustard"],
-    "de": ["senf"],
-    "fr": ["moutarde"],
-    "pl": ["musztarda"],
-    "sk": ["horčica"],
-    "variants": []
+    "en": ["mustard", "mustard seed", "mustard flour", "mustard oil", "mustard leaves"],
+    "de": ["senf", "senfkörner", "senfmehl", "senföl"],
+    "fr": ["moutarde", "graines de moutarde", "farine de moutarde"],
+    "pl": ["musztarda", "nasiona gorczycy", "mąka gorczycowa"],
+    "sk": ["horčica", "horčičné semená", "horčičná múka"],
+    "variants": ["mustard extract", "mustard protein", "mustard sauce"]
   },
   {
     "cz": "Sezam",
-    "en": ["sesame"],
-    "de": ["sesam"],
-    "fr": ["sésame"],
-    "pl": ["sezam"],
-    "sk": ["sezam"],
-    "variants": ["sesame oil"]
+    "en": ["sesame", "sesame seed", "sesame oil", "tahini"],
+    "de": ["sesam", "sesamsamen", "sesamöl", "tahini"],
+    "fr": ["sésame", "graines de sésame", "huile de sésame", "tahini"],
+    "pl": ["sezam", "nasiona sezamu", "olej sezamowy", "tahini"],
+    "sk": ["sezam", "sezamové semená", "sezamový olej", "tahini"],
+    "variants": ["sesame flour", "sesame paste", "sesame extract"]
   },
   {
-    "cz": "Skořápky",
-    "en": ["shellfish", "crustaceans"],
-    "de": ["schalentiere"],
-    "fr": ["crustacés"],
-    "pl": ["skorupiaki"],
-    "sk": ["kôrovce"],
-    "variants": ["shrimp", "prawn"]
+    "cz": "Oxid siřičitý",
+    "en": ["sulphur dioxide", "sulfur dioxide", "sulphites", "sulfites", "E220", "E221", "E222", "E223", "E224", "E226", "E227", "E228"],
+    "de": ["schwefeldioxid", "sulfit", "sulfite", "E220", "E221", "E222", "E223", "E224"],
+    "fr": ["dioxyde de soufre", "sulfites", "E220", "E221", "E222", "E223", "E224"],
+    "pl": ["dwutlenek siarki", "siarczyny", "E220", "E221", "E222", "E223", "E224"],
+    "sk": ["oxid siričitý", "siričitany", "E220", "E221", "E222", "E223", "E224"],
+    "variants": ["sulphiting agents", "metabisulphite", "sodium sulphite", "potassium sulphite"]
+  },
+  {
+    "cz": "Vlčí bob",
+    "en": ["lupin", "lupine", "lupin seed", "lupin flour", "lupin protein"],
+    "de": ["lupine", "lupinenmehl", "lupinenprotein", "lupinensamen"],
+    "fr": ["lupin", "farine de lupin", "protéine de lupin"],
+    "pl": ["łubin", "mąka łubinowa", "białko łubinowe"],
+    "sk": ["lupina", "lupínová múka", "lupínový proteín"],
+    "variants": ["lupin extract", "lupin bean"]
+  },
+  {
+    "cz": "Měkkýši",
+    "en": ["molluscs", "mollusks", "squid", "octopus", "mussel", "oyster", "scallop", "clam", "snail", "abalone"],
+    "de": ["weichtiere", "tintenfisch", "oktopus", "muschel", "auster", "schnecke"],
+    "fr": ["mollusques", "calmar", "pieuvre", "moule", "huître", "escargot"],
+    "pl": ["mięczaki", "kałamarnica", "ośmiornica", "małż", "ostryga", "ślimak"],
+    "sk": ["mäkkýše", "chobotnica", "kalamár", "mušľa", "ustrica", "slimák"],
+    "variants": ["mollusc extract", "squid ink", "oyster sauce", "mussel extract"]
   }
 ]

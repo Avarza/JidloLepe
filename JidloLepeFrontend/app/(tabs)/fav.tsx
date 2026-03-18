@@ -10,21 +10,37 @@ import { API_BASE_URL } from "@/config/api";
 import icons from "@/constants/icons";
 
 const allAllergens = [
-    { name: 'Lepek',     emoji: '🌾' },
-    { name: 'Mléko',    emoji: '🥛' },
-    { name: 'Ořechy',   emoji: '🥜' },
-    { name: 'Sója',     emoji: '🫘' },
-    { name: 'Vejce',    emoji: '🥚' },
-    { name: 'Ryby',     emoji: '🐟' },
-    { name: 'Celer',    emoji: '🥬' },
-    { name: 'Hořčice',  emoji: '🌿' },
-    { name: 'Sezam',    emoji: '🌱' },
-    { name: 'Skořápky', emoji: '🦐' },
+    { name: 'Lepek',               emoji: '🌾' },
+    { name: 'Korýši',              emoji: '🦐' },
+    { name: 'Vejce',               emoji: '🥚' },
+    { name: 'Ryby',                emoji: '🐟' },
+    { name: 'Arašídy',             emoji: '🥜' },
+    { name: 'Sója',                emoji: '🫘' },
+    { name: 'Mléko',               emoji: '🥛' },
+    { name: 'Skořápkové ořechy',   emoji: '🌰' },
+    { name: 'Celer',               emoji: '🥬' },
+    { name: 'Hořčice',             emoji: '🌿' },
+    { name: 'Sezam',               emoji: '🌱' },
+    { name: 'Oxid siřičitý',       emoji: '🧪' },
+    { name: 'Vlčí bob',            emoji: '🌸' },
+    { name: 'Měkkýši',             emoji: '🐚' },
 ];
 
 const allergenIdMap: { [key: string]: number } = {
-    Lepek: 1, Mléko: 2, Ořechy: 3, Sója: 4, Vejce: 5,
-    Ryby: 6, Celer: 7, Hořčice: 8, Sezam: 9, Skořápky: 10,
+    'Lepek':              1,
+    'Korýši':             2,
+    'Vejce':              3,
+    'Ryby':               4,
+    'Arašídy':            5,
+    'Sója':               6,
+    'Mléko':              7,
+    'Skořápkové ořechy':  8,
+    'Celer':              9,
+    'Hořčice':            10,
+    'Sezam':              11,
+    'Oxid siřičitý':      12,
+    'Vlčí bob':           13,
+    'Měkkýši':            14,
 };
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';

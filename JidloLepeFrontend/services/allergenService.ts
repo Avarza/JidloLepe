@@ -1,40 +1,40 @@
-// /services/allergenService.ts
-import { db } from '@/constants/firebaseConfig';
-import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
+// services/allergenService.ts
+import { API_BASE_URL } from '@/config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const getAuthHeader = async () => {
+    const token = await AsyncStorage.getItem('authToken');
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+    };
+};
+
+// Načte číselník všech alergenů z PostgreSQL (GET /api/allergens)
 export const fetchAllergens = async () => {
-    try {
-        const querySnapshot = await getDocs(collection(db, 'allergens'));
-        const allergenData: any = {};
-        querySnapshot.forEach(doc => {
-            allergenData[doc.id] = doc.data().allergens;
-        });
-        return allergenData;
-    } catch (error) {
-        throw new Error('Nelze načíst alergeny.');
-    }
+    const headers = await getAuthHeader();
+    const response = await fetch(`${API_BASE_URL}/api/allergens`, { headers });
+    if (!response.ok) throw new Error('Nelze načíst alergeny.');
+    return response.json();
 };
 
-export const fetchUserAllergens = async (userId: string) => {
-    try {
-        const docRef = doc(db, 'users', userId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const userData = docSnap.data();
-            return userData?.allergens || [];
-        }
-        return [];
-    } catch (error) {
-        throw new Error('Nelze načíst alergeny uživatele.');
-    }
+// Načte alergeny přihlášeného uživatele — email bere backend z JWT tokenu
+// GET /api/users/allergens
+export const fetchUserAllergens = async () => {
+    const headers = await getAuthHeader();
+    const response = await fetch(`${API_BASE_URL}/api/users/allergens`, { headers });
+    if (!response.ok) throw new Error('Nelze načíst alergeny uživatele.');
+    return response.json();
 };
 
-export const saveUserAllergens = async (userId: string, selectedAllergens: string[]) => {
-    try {
-        await setDoc(doc(db, 'users', userId), {
-            allergens: selectedAllergens,
-        }, { merge: true });
-    } catch (error) {
-        throw new Error('Nepodařilo se uložit alergeny.');
-    }
+// Uloží vybrané alergeny uživatele do PostgreSQL (tabulka user_allergens)
+// PUT /api/users/allergens — body: { email, allergenIds }
+export const saveUserAllergens = async (email: string, allergenIds: number[]) => {
+    const headers = await getAuthHeader();
+    const response = await fetch(`${API_BASE_URL}/api/users/allergens`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ email, allergenIds }),
+    });
+    if (!response.ok) throw new Error('Nepodařilo se uložit alergeny.');
 };
