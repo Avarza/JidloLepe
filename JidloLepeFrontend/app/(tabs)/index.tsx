@@ -1,6 +1,6 @@
-import { Text, View, ScrollView, Image, Pressable, Animated } from 'react-native';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState, useRef } from 'react';
+import { Text, View, ScrollView, Image, Pressable, Animated, AppState } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import SearchBar from "@/components/searchBar";
 import icons from "@/constants/icons";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,25 +15,23 @@ interface Product {
     allergens?: string[];
 }
 
-// ── Všech 14 EU alergenů ──────────────────────────────────────────────────────
 const allergenEmoji: Record<string, string> = {
-    'Lepek':              '🌾',
-    'Korýši':             '🦐',
-    'Vejce':              '🥚',
-    'Ryby':               '🐟',
-    'Arašídy':            '🥜',
-    'Sója':               '🫘',
-    'Mléko':              '🥛',
-    'Skořápkové ořechy':  '🌰',
-    'Celer':              '🥬',
-    'Hořčice':            '🌿',
-    'Sezam':              '🌱',
-    'Oxid siřičitý':      '🧪',
-    'Vlčí bob':           '🌸',
-    'Měkkýši':            '🐚',
+    'Lepek':             '🌾',
+    'Korýši':            '🦐',
+    'Vejce':             '🥚',
+    'Ryby':              '🐟',
+    'Arašídy':           '🥜',
+    'Sója':              '🫘',
+    'Mléko':             '🥛',
+    'Skořápkové ořechy': '🌰',
+    'Celer':             '🥬',
+    'Hořčice':           '🌿',
+    'Sezam':             '🌱',
+    'Oxid siřičitý':     '🧪',
+    'Vlčí bob':          '🌸',
+    'Měkkýši':           '🐚',
 };
 
-// ── Mapování OFF tagů → české názvy (všech 14) ────────────────────────────────
 const tagToName: Record<string, string> = {
     'en:gluten':          'Lepek',
     'en:wheat':           'Lepek',
@@ -73,12 +71,14 @@ const tagToName: Record<string, string> = {
     'en:mollusks':        'Měkkýši',
 };
 
+const CACHE_KEY = 'recommended_cache';
+const CACHE_TTL = 60 * 60 * 1000;
+
 function getDangerousAllergens(product: Product, userAllergens: string[]): string[] {
     if (!product.allergens || userAllergens.length === 0) return [];
     return product.allergens.filter(a => userAllergens.includes(a));
 }
 
-// ── Skeleton card ─────────────────────────────────────────────────────────────
 function SkeletonCard() {
     const shimmer = useRef(new Animated.Value(0)).current;
     useEffect(() => {
@@ -99,7 +99,6 @@ function SkeletonCard() {
     );
 }
 
-// ── Product card ──────────────────────────────────────────────────────────────
 function ProductCard({
                          product,
                          userAllergens,
@@ -159,7 +158,6 @@ function ProductCard({
     );
 }
 
-// ── Allergen chip ─────────────────────────────────────────────────────────────
 function AllergenChip({ name }: { name: string }) {
     return (
         <View className="flex-row items-center bg-[#764534] rounded-full px-3 py-1 mr-2 mb-2">
@@ -170,7 +168,6 @@ function AllergenChip({ name }: { name: string }) {
     );
 }
 
-// ── Main screen ───────────────────────────────────────────────────────────────
 export default function Home() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -193,6 +190,7 @@ export default function Home() {
         ).start();
     }, []);
 
+    // ── Produkty z backendu ───────────────────────────────────────────────────
     useEffect(() => {
         (async () => {
             try {
@@ -207,6 +205,7 @@ export default function Home() {
         })();
     }, []);
 
+    // ── Naposledy prohlížené ──────────────────────────────────────────────────
     useEffect(() => {
         (async () => {
             const stored = await AsyncStorage.getItem("recent_products");
@@ -214,9 +213,20 @@ export default function Home() {
         })();
     }, []);
 
+    // ── Doporučené produkty z OFF (s cache 1 hodina) ──────────────────────────
     useEffect(() => {
         (async () => {
             try {
+                const cached = await AsyncStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const { data, ts } = JSON.parse(cached);
+                    if (Date.now() - ts < CACHE_TTL) {
+                        setRecommended(data);
+                        setLoadingRecommended(false);
+                        return;
+                    }
+                }
+
                 const randomPage = Math.floor(Math.random() * 50) + 1;
                 const url =
                     `https://world.openfoodfacts.org/api/v2/search` +
@@ -227,10 +237,16 @@ export default function Home() {
                     `&countries_tags=en:czechia`;
 
                 const res = await fetch(url, {
-                    headers: { 'User-Agent': 'AllergenChecker/1.0 (your@email.com)' },
+                    headers: { 'User-Agent': 'AllergenChecker/1.0 (jitka@email.com)' },
                 });
-                const data = await res.json();
 
+                const text = await res.text();
+                if (!text.trim().startsWith('{') && !text.trim().startsWith('[')) {
+                    console.warn('OFF API vrátilo neplatnou odpověď (rate limit?)');
+                    return;
+                }
+
+                const data = JSON.parse(text);
                 if (data.products) {
                     const normalised: Product[] = data.products
                         .filter((p: any) => p.product_name && p.image_front_url)
@@ -246,6 +262,10 @@ export default function Home() {
                         }));
 
                     setRecommended(normalised);
+                    await AsyncStorage.setItem(CACHE_KEY, JSON.stringify({
+                        data: normalised,
+                        ts: Date.now(),
+                    }));
                 }
             } catch (e) {
                 console.error('Chyba při načítání doporučených produktů:', e);
@@ -255,17 +275,35 @@ export default function Home() {
         })();
     }, []);
 
-    useEffect(() => {
-        if (!isLoggedIn) return;
-        (async () => {
-            const token = await AsyncStorage.getItem("token");
-            if (!token) return;
+    // ── Načítání alergenů ─────────────────────────────────────────────────────
+    const fetchUserAllergens = useCallback(async () => {
+        if (!isLoggedIn) { setUserAllergens([]); return; }
+        const token = await AsyncStorage.getItem("token");
+        if (!token) { setUserAllergens([]); return; }
+        try {
             const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) setUserAllergens(await res.json());
-        })();
+        } catch {
+            console.error('Chyba při načítání alergenů');
+        }
     }, [isLoggedIn]);
+
+    // Spustí se pokaždé když uživatel přepne na tento tab
+    useFocusEffect(
+        useCallback(() => {
+            fetchUserAllergens();
+        }, [fetchUserAllergens])
+    );
+
+    // Spustí se při návratu aplikace do popředí
+    useEffect(() => {
+        const sub = AppState.addEventListener("change", state => {
+            if (state === "active") fetchUserAllergens();
+        });
+        return () => sub.remove();
+    }, [fetchUserAllergens]);
 
     const warningCount = recommended.filter(
         p => getDangerousAllergens(p, userAllergens).length > 0
@@ -340,14 +378,22 @@ export default function Home() {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="px-5 gap-4">
                     {loadingRecommended
                         ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-                        : recommended.map((p, i) => (
-                            <ProductCard
-                                key={`${p.code}-${i}`}
-                                product={p}
-                                userAllergens={userAllergens}
-                                onPress={() => router.push({ pathname: '/Product/[id]', params: { id: p.code } })}
-                            />
-                        ))
+                        : recommended.length > 0
+                            ? recommended.map((p, i) => (
+                                <ProductCard
+                                    key={`${p.code}-${i}`}
+                                    product={p}
+                                    userAllergens={userAllergens}
+                                    onPress={() => router.push({ pathname: '/Product/[id]', params: { id: p.code } })}
+                                />
+                            ))
+                            : (
+                                <View className="w-64 items-center justify-center py-8">
+                                    <Text className="text-[#A08070] text-sm text-center">
+                                        Doporučené produkty se nepodařilo načíst.{'\n'}Zkuste to znovu později.
+                                    </Text>
+                                </View>
+                            )
                     }
                 </ScrollView>
             </View>
