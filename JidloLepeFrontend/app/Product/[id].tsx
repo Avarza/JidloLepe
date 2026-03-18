@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     Text, View, Image, ScrollView, TouchableOpacity,
@@ -40,7 +40,6 @@ interface ProductData {
     nutriments?: Nutriments;
 }
 
-// ── Nutri-Score config ────────────────────────────────────────────────────────
 const NUTRISCORE: Record<string, { bg: string; text: string; label: string }> = {
     a: { bg: '#1E8F4E', text: '#fff', label: 'Výborné' },
     b: { bg: '#80C040', text: '#fff', label: 'Dobré' },
@@ -49,9 +48,41 @@ const NUTRISCORE: Record<string, { bg: string; text: string; label: string }> = 
     e: { bg: '#E63312', text: '#fff', label: 'Velmi špatné' },
 };
 
-// ── Loading skeleton ──────────────────────────────────────────────────────────
+// ── Vrací pouze alergeny skutečně nalezené ve složení ─────────────────────────
+function getFoundAllergens(productData: ProductData, userAllergens: string[]): string[] {
+    if (userAllergens.length === 0) return [];
+    const ingredients =
+        productData.ingredients_text_cz || productData.ingredients_text ||
+        productData.ingredients_text_en || productData.ingredients_text_de ||
+        productData.ingredients_text_fr || productData.ingredients_text_pl ||
+        productData.ingredients_text_sk || null;
+    if (!ingredients) return [];
+
+    const lower = ingredients.toLowerCase();
+    const found: string[] = [];
+
+    for (const item of allergensData) {
+        if (!userAllergens.includes(item.cz)) continue;
+        const terms = [
+            item.cz,
+            ...(item.en || []),
+            ...(item.de || []),
+            ...(item.fr || []),
+            ...(item.pl || []),
+            ...(item.sk || []),
+            ...(item.variants || []),
+        ].map(t => t.toLowerCase());
+
+        if (terms.some(t => lower.includes(t))) {
+            found.push(item.cz);
+        }
+    }
+
+    return found;
+}
+
 function LoadingSkeleton() {
-    const shimmer = new Animated.Value(0);
+    const shimmer = useRef(new Animated.Value(0)).current;
     useEffect(() => {
         Animated.loop(
             Animated.sequence([
@@ -73,7 +104,6 @@ function LoadingSkeleton() {
     );
 }
 
-// ── Nutrition row ─────────────────────────────────────────────────────────────
 function NutriRow({ label, value, unit, bold }: { label: string; value?: number; unit: string; bold?: boolean }) {
     if (value === undefined || value === null) return null;
     return (
@@ -86,7 +116,6 @@ function NutriRow({ label, value, unit, bold }: { label: string; value?: number;
     );
 }
 
-// ── Nutri-Score visual ────────────────────────────────────────────────────────
 function NutriScoreBar({ grade }: { grade: string }) {
     const grades = ['a', 'b', 'c', 'd', 'e'];
     return (
@@ -95,16 +124,13 @@ function NutriScoreBar({ grade }: { grade: string }) {
                 const cfg = NUTRISCORE[g];
                 const active = g === grade;
                 return (
-                    <View
-                        key={g}
-                        style={{
-                            backgroundColor: cfg.bg,
-                            opacity: active ? 1 : 0.25,
-                            paddingHorizontal: active ? 14 : 10,
-                            paddingVertical: active ? 8 : 5,
-                            borderRadius: 8,
-                        }}
-                    >
+                    <View key={g} style={{
+                        backgroundColor: cfg.bg,
+                        opacity: active ? 1 : 0.25,
+                        paddingHorizontal: active ? 14 : 10,
+                        paddingVertical: active ? 8 : 5,
+                        borderRadius: 8,
+                    }}>
                         <Text style={{ color: cfg.text, fontWeight: active ? '900' : '600', fontSize: active ? 15 : 11 }}>
                             {g.toUpperCase()}
                         </Text>
@@ -121,90 +147,71 @@ export default function ProductDetail() {
     const insets = useSafeAreaInsets();
 
     const [productData, setProductData] = useState<ProductData | null>(null);
+    const [foundAllergens, setFoundAllergens] = useState<string[]>([]); // jen ty co jsou v produktu
     const [hasAllergen, setHasAllergen] = useState<boolean | null>(null);
     const [userAllergens, setUserAllergens] = useState<string[]>([]);
     const [overlayVisible, setOverlayVisible] = useState(true);
     const [loginRequired, setLoginRequired] = useState(false);
 
-    // ── Fetch product via backend (saves to history when logged in) ──────────
     useEffect(() => {
         if (!id) return;
+        let cancelled = false;
+
         (async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
+            const token = await AsyncStorage.getItem('token');
+            const productPromise = fetchProduct(id as string, token);
+            const allergensPromise = token ? fetchAllergens(token) : Promise.resolve(null);
+            const [product, allergens] = await Promise.all([productPromise, allergensPromise]);
+            if (cancelled) return;
 
-                const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                });
+            if (product) setProductData(product);
 
-                // Guard: empty or non-JSON response from backend
-                const text = await res.text();
-                if (!text || !text.trim().startsWith('{')) {
-                    throw new Error(`Backend vrátil neplatnou odpověď: ${text.slice(0, 100)}`);
-                }
-
-                const data = JSON.parse(text);
-                if (data.product) {
-                    setProductData(data.product);
-                } else {
-                    throw new Error('Produkt nebyl nalezen v odpovědi');
-                }
-            } catch (backendErr) {
-                console.warn('Backend selhal, zkouším přímo OFF:', backendErr);
-                // Fallback: fetch directly from Open Food Facts
-                try {
-                    const res = await fetch(
-                        `https://world.openfoodfacts.org/api/v0/product/${id}.json`
-                    );
-                    const data = await res.json();
-                    if (data.product) setProductData(data.product);
-                    else console.error('Produkt nenalezen ani v OFF');
-                } catch (offErr) {
-                    console.error('Chyba při načítání produktu z OFF:', offErr);
+            if (allergens === null) {
+                setLoginRequired(!token ? true : false);
+                setUserAllergens([]);
+                setHasAllergen(null);
+                setFoundAllergens([]);
+                setOverlayVisible(true);
+            } else {
+                setLoginRequired(false);
+                setUserAllergens(allergens);
+                if (product && allergens.length > 0) {
+                    const found = getFoundAllergens(product, allergens);
+                    setFoundAllergens(found);
+                    setHasAllergen(found.length > 0);
+                    setOverlayVisible(true);
                 }
             }
         })();
+
+        return () => { cancelled = true; };
     }, [id]);
 
-    // ── Check login + fetch allergens ─────────────────────────────────────────
-    const checkLogin = async () => {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) { setLoginRequired(true); setUserAllergens([]); setHasAllergen(null); setOverlayVisible(true); return; }
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) { setLoginRequired(true); setUserAllergens([]); setHasAllergen(null); setOverlayVisible(true); return; }
-            setUserAllergens(await res.json());
+    useEffect(() => {
+        const sub = AppState.addEventListener("change", async (state) => {
+            if (state !== "active") return;
+            const token = await AsyncStorage.getItem("token");
+            if (!token) {
+                setLoginRequired(true);
+                setUserAllergens([]);
+                setHasAllergen(null);
+                setFoundAllergens([]);
+                setOverlayVisible(true);
+                return;
+            }
+            const allergens = await fetchAllergens(token);
+            if (allergens === null) { setLoginRequired(true); return; }
             setLoginRequired(false);
-        } catch { setLoginRequired(true); }
-    };
-
-    useEffect(() => {
-        checkLogin();
-        const sub = AppState.addEventListener("change", s => { if (s === "active") checkLogin(); });
+            setUserAllergens(allergens);
+            if (productData) {
+                const found = getFoundAllergens(productData, allergens);
+                setFoundAllergens(found);
+                setHasAllergen(found.length > 0);
+                setOverlayVisible(true);
+            }
+        });
         return () => sub.remove();
-    }, []);
-
-    // ── Match allergens ───────────────────────────────────────────────────────
-    useEffect(() => {
-        if (!productData || userAllergens.length === 0) return;
-        const ingredients =
-            productData.ingredients_text_cz || productData.ingredients_text ||
-            productData.ingredients_text_en || productData.ingredients_text_de ||
-            productData.ingredients_text_fr || productData.ingredients_text_pl ||
-            productData.ingredients_text_sk || null;
-        if (!ingredients) return;
-        const lower = ingredients.toLowerCase();
-        const selected = allergensData.filter(item => userAllergens.includes(item.cz));
-        const terms = selected.flatMap(item => [
-            item.cz, ...(item.en || []), ...(item.de || []), ...(item.fr || []),
-            ...(item.pl || []), ...(item.sk || []), ...(item.variants || []),
-        ]).map(t => t.toLowerCase());
-        const found = terms.some(t => lower.includes(t));
-        setHasAllergen(found);
-        setOverlayVisible(true); // re-show overlay whenever result changes
-    }, [productData, userAllergens]);
+    }, [productData]);
 
     if (!productData) return <LoadingSkeleton />;
 
@@ -219,7 +226,6 @@ export default function ProductDetail() {
     return (
         <View className="flex-1 bg-[#F5EFE6]">
 
-            {/* ── Login overlay ─────────────────────────────────────────────── */}
             {loginRequired && (
                 <View className="absolute inset-0 z-20 bg-black/90 items-center justify-center p-5">
                     <Ionicons name="lock-closed" size={50} color="white" />
@@ -238,7 +244,6 @@ export default function ProductDetail() {
                 </View>
             )}
 
-            {/* ── Allergen result overlay ───────────────────────────────────── */}
             {overlayVisible && hasAllergen !== null && !loginRequired && (
                 <View className="absolute inset-0 z-20 bg-black/90 items-center justify-center p-5">
                     <Image
@@ -257,7 +262,6 @@ export default function ProductDetail() {
                 </View>
             )}
 
-            {/* ── Back button ───────────────────────────────────────────────── */}
             <TouchableOpacity
                 className="absolute z-10 left-4 bg-white/80 rounded-full p-2"
                 style={{ top: insets.top + 8 }}
@@ -271,7 +275,6 @@ export default function ProductDetail() {
                 contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
                 showsVerticalScrollIndicator={false}
             >
-                {/* ── Hero image ────────────────────────────────────────────── */}
                 <View className="bg-white items-center px-8 pb-6" style={{ paddingTop: insets.top + 52 }}>
                     {productData.image_url ? (
                         <Image
@@ -289,7 +292,6 @@ export default function ProductDetail() {
 
                 <View className="px-5 pt-5 gap-4">
 
-                    {/* ── Name, brand, badges ───────────────────────────────── */}
                     <View>
                         <Text className="text-2xl font-extrabold text-[#3D2314] leading-tight">
                             {productData.product_name || 'Neznámý produkt'}
@@ -297,11 +299,10 @@ export default function ProductDetail() {
                         {productData.brands && (
                             <Text className="text-sm text-[#A08070] mt-1">{productData.brands}</Text>
                         )}
-
                         <View className="flex-row flex-wrap gap-2 mt-3">
                             {productData.quantity && (
                                 <View className="bg-white border border-[#E0D4C4] rounded-full px-3 py-1.5 flex-row items-center gap-1">
-                                    <Text className="text-xs">📦</Text>
+                                    <Image source={icons.box} className="w-4 h-4" resizeMode="contain" />
                                     <Text className="text-xs text-[#5C4033] font-medium">{productData.quantity}</Text>
                                 </View>
                             )}
@@ -316,16 +317,12 @@ export default function ProductDetail() {
                         </View>
                     </View>
 
-                    {/* ── Nutri-Score card ──────────────────────────────────── */}
                     {nutriGrade && nutriCfg && (
                         <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
                             <Text className="text-base font-bold text-[#3D2314] mb-3">Nutri-Score</Text>
                             <View className="flex-row items-center justify-between">
                                 <NutriScoreBar grade={nutriGrade} />
-                                <View
-                                    className="rounded-xl px-3 py-1.5 ml-3"
-                                    style={{ backgroundColor: nutriCfg.bg }}
-                                >
+                                <View className="rounded-xl px-3 py-1.5 ml-3" style={{ backgroundColor: nutriCfg.bg }}>
                                     <Text style={{ color: nutriCfg.text }} className="text-xs font-bold">
                                         {nutriCfg.label}
                                     </Text>
@@ -334,18 +331,17 @@ export default function ProductDetail() {
                         </View>
                     )}
 
-                    {/* ── Ingredients ───────────────────────────────────────── */}
                     <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
                         <Text className="text-base font-bold text-[#3D2314] mb-3">Složení</Text>
                         <Text className="text-sm text-[#5C4033] leading-5">{ingredients}</Text>
                     </View>
 
-                    {/* ── Allergen list ─────────────────────────────────────── */}
-                    {hasAllergen && userAllergens.length > 0 && (
+                    {/* ── Pouze nalezené alergeny ───────────────────────────── */}
+                    {foundAllergens.length > 0 && (
                         <View className="bg-red-50 border border-red-200 rounded-2xl p-4">
                             <Text className="text-sm font-bold text-red-700 mb-2">⚠️ Vaše alergeny v tomto produktu</Text>
                             <View className="flex-row flex-wrap gap-2">
-                                {userAllergens.map(a => (
+                                {foundAllergens.map(a => (
                                     <View key={a} className="bg-red-100 rounded-full px-3 py-1">
                                         <Text className="text-xs font-semibold text-red-700">{a}</Text>
                                     </View>
@@ -354,20 +350,17 @@ export default function ProductDetail() {
                         </View>
                     )}
 
-                    {/* ── Nutrition table ───────────────────────────────────── */}
                     {productData.nutriments && (
                         <View className="bg-white rounded-2xl border border-[#EDE3D6] overflow-hidden mb-2">
                             <View className="px-4 py-3 border-b border-[#F0E8DC]">
                                 <Text className="text-base font-bold text-[#3D2314]">Nutriční hodnoty</Text>
                                 <Text className="text-xs text-[#A08070] mt-0.5">na 100 g / 100 ml</Text>
                             </View>
-
                             <View className="px-4 pb-2">
                                 <NutriRow
                                     label="Energetická hodnota"
                                     value={n.energy_kcal_100g ?? (n.energy_100g ? Math.round(n.energy_100g / 4.184) : undefined)}
-                                    unit="kcal"
-                                    bold
+                                    unit="kcal" bold
                                 />
                                 <NutriRow label="Tuky" value={n.fat_100g} unit="g" bold />
                                 <NutriRow label="z toho nasycené mastné kyseliny" value={n['saturated-fat_100g']} unit="g" />
@@ -384,4 +377,40 @@ export default function ProductDetail() {
             </ScrollView>
         </View>
     );
+}
+
+async function fetchProduct(id: string, token: string | null): Promise<ProductData | null> {
+    try {
+        const res = await fetch(
+            `https://world.openfoodfacts.org/api/v2/product/${id}?fields=product_name,image_url,ingredients_text,ingredients_text_cz,ingredients_text_en,ingredients_text_de,ingredients_text_fr,ingredients_text_pl,ingredients_text_sk,brands,quantity,nutriscore_grade,nutriments`
+        );
+        const data = await res.json();
+        const product = data.product ?? null;
+        if (token) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 4000);
+            fetch(`${API_BASE_URL}/api/products/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                signal: controller.signal,
+            })
+                .then(() => clearTimeout(timeout))
+                .catch(() => clearTimeout(timeout));
+        }
+        return product;
+    } catch (err) {
+        console.error('Chyba při načítání produktu z OFF:', err);
+        return null;
+    }
+}
+
+async function fetchAllergens(token: string): Promise<string[] | null> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return null;
+        return await res.json();
+    } catch {
+        return null;
+    }
 }
