@@ -275,13 +275,24 @@ export default function Home() {
             const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (res.ok) setUserAllergens(await res.json());
+            if (!res.ok) {
+                setUserAllergens([]);
+                return;
+            }
+            setUserAllergens(await res.json());
         } catch {
+            setUserAllergens([]);
             console.error('Chyba při načítání alergenů');
         }
     }, [isLoggedIn]);
 
     // Spustí se pokaždé když uživatel přepne na tento tab
+    useEffect(() => {
+        if (!isLoggedIn) {
+            setUserAllergens([]);
+        }
+    }, [isLoggedIn]);
+
     useFocusEffect(
         useCallback(() => {
             fetchUserAllergens();

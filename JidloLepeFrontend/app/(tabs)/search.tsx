@@ -67,7 +67,7 @@ const Search = () => {
     const searchCache = useRef<Record<string, Product[]>>({});
 
     const [query, setQuery] = useState('');
-    const [backendProducts, setBackendProducts] = useState<Product[]>([]);
+    const [randomProducts, setRandomProducts] = useState<Product[]>([]);
     const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
@@ -77,11 +77,12 @@ const Search = () => {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch(`${API_BASE_URL}/api/products/`);
+                const randomPage = Math.floor(Math.random() * 50) + 1;
+                const res = await fetch(`${API_BASE_URL}/api/products/recommended?page=${randomPage}`);
                 const data = await res.json();
-                if (data.products) setBackendProducts(data.products);
+                if (data.products) setRandomProducts(data.products.filter((p: Product) => p.code));
             } catch (e) {
-                console.error('Chyba při načítání produktů:', e);
+                console.error('Chyba při načítání náhodných produktů:', e);
             } finally {
                 setLoading(false);
             }
@@ -146,7 +147,7 @@ const Search = () => {
         setSearched(false);
     };
 
-    const showBackend = !query && !loading;
+    const showRandom = !query && !loading;
     const showResults = !!query;
     const isEmpty = searched && !searching && searchResults.length === 0;
 
@@ -222,17 +223,17 @@ const Search = () => {
                 )}
 
                 {/* Section label */}
-                {!searching && (showBackend || (showResults && searchResults.length > 0)) && (
+                {!searching && (showRandom || (showResults && searchResults.length > 0)) && (
                     <Text className="text-xs font-semibold text-[#A08070] uppercase tracking-widest mb-3">
                         {showResults
                             ? `${searchResults.length} výsledků pro „${query}"`
-                            : `${backendProducts.length} produktů v databázi`}
+                            : `${randomProducts.length} náhodných produktů`}
                     </Text>
                 )}
 
-                {/* Backend products */}
-                {showBackend &&
-                    backendProducts.map(p =>
+                {/* Random products */}
+                {showRandom &&
+                    randomProducts.map(p =>
                         p.code ? (
                             <ProductRow
                                 key={p.code}

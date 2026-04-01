@@ -232,17 +232,24 @@ export default function ProfileTabScreen() {
     // ── Fetch allergens on focus ──────────────────────────────────────────────
     useFocusEffect(
         React.useCallback(() => {
-            if (!isLoggedIn) return;
+            if (!isLoggedIn) {
+                setUserAllergens([]);
+                return;
+            }
             (async () => {
                 try {
                     const token = await AsyncStorage.getItem('token');
-                    if (!token) return;
+                    if (!token) {
+                        setUserAllergens([]);
+                        return;
+                    }
                     const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                         headers: { Authorization: `Bearer ${token}` },
                     });
                     if (!res.ok) throw new Error();
                     setUserAllergens(await res.json());
                 } catch (e) {
+                    setUserAllergens([]);
                     console.error('Chyba při načítání alergenů:', e);
                 }
             })();
@@ -251,7 +258,11 @@ export default function ProfileTabScreen() {
 
     // ── Fetch scan history from backend ──────────────────────────────────────
     useEffect(() => {
-        if (!isLoggedIn) return;
+        if (!isLoggedIn) {
+            setHistory([]);
+            setUserAllergens([]);
+            return;
+        }
         (async () => {
             setLoadingHistory(true);
             try {
