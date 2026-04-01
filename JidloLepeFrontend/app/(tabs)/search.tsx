@@ -62,6 +62,10 @@ const Search = () => {
     const insets = useSafeAreaInsets();
     const inputRef = useRef<TextInput>(null);
 
+    // 🔥 FIXES
+    const isFetchingRef = useRef(false);
+    const searchCache = useRef<Record<string, Product[]>>({});
+
     const [query, setQuery] = useState('');
     const [backendProducts, setBackendProducts] = useState<Product[]>([]);
     const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -69,6 +73,7 @@ const Search = () => {
     const [searching, setSearching] = useState(false);
     const [searched, setSearched] = useState(false);
 
+    // ── Load backend products ────────────────────────────────────────────────
     useEffect(() => {
         (async () => {
             try {
@@ -83,22 +88,55 @@ const Search = () => {
         })();
     }, []);
 
+    // ── SEARCH ───────────────────────────────────────────────────────────────
     const handleSearch = async () => {
         if (!query.trim()) return;
+
+        // 🚫 zabrání spam klikům
+        if (isFetchingRef.current) return;
+
+        // 🧠 cache
+        if (searchCache.current[query]) {
+            setSearchResults(searchCache.current[query]);
+            setSearched(true);
+            return;
+        }
+
+        isFetchingRef.current = true;
+
         inputRef.current?.blur();
         setSearching(true);
         setSearchResults([]);
         setSearched(true);
+
         try {
-            const res = await fetch(
-                `https://world.openfoodfacts.org/cgi/search.pl?action=process&search_terms=${encodeURIComponent(query)}&page_size=20&json=true`
-            );
-            const data = await res.json();
-            setSearchResults(data.products || []);
+            const url = `${API_BASE_URL}/api/products/search?query=${encodeURIComponent(query)}`;
+            const res = await fetch(url);
+
+            const text = await res.text();
+
+            // 🔍 debug (klidně nech)
+            console.log('STATUS:', res.status);
+            console.log('RAW:', text.slice(0, 100));
+
+            // 🛡️ ochrana proti HTML / špatné odpovědi
+            if (!text || text.startsWith('<')) {
+                console.warn('OFF vrátil HTML nebo prázdno');
+                return;
+            }
+
+            const data = JSON.parse(text);
+            const products = data.products || [];
+
+            // 🧠 cache
+            searchCache.current[query] = products;
+
+            setSearchResults(products);
         } catch (e) {
             console.error('Chyba při hledání:', e);
         } finally {
             setSearching(false);
+            isFetchingRef.current = false;
         }
     };
 
@@ -115,10 +153,7 @@ const Search = () => {
     return (
         <View className="flex-1 bg-[#F5EFE6]">
             {/* ── Header ── */}
-            <View
-                className="px-5 pb-4 bg-[#F5EFE6]"
-                style={{ paddingTop: insets.top + 16 }}
-            >
+            <View className="px-5 pb-4 bg-[#F5EFE6]" style={{ paddingTop: insets.top + 16 }}>
                 <Text className="text-2xl font-extrabold text-[#764534] mb-4 tracking-tight">
                     Hledat produkty
                 </Text>
@@ -149,6 +184,8 @@ const Search = () => {
                 {/* Search button */}
                 <Pressable
                     onPress={handleSearch}
+                    disabled={searching}
+                    style={{ opacity: searching ? 0.6 : 1 }}
                     className="bg-[#764534] rounded-2xl py-3 items-center mt-3"
                 >
                     <Text className="text-white font-bold text-sm tracking-wide">Hledat</Text>
@@ -163,11 +200,7 @@ const Search = () => {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Loading backend */}
-                {loading && (
-                    <>
-                        {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
-                    </>
-                )}
+                {loading && Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
 
                 {/* Searching spinner */}
                 {searching && (

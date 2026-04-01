@@ -228,17 +228,8 @@ export default function Home() {
                 }
 
                 const randomPage = Math.floor(Math.random() * 50) + 1;
-                const url =
-                    `https://world.openfoodfacts.org/api/v2/search` +
-                    `?sort_by=unique_scans_n` +
-                    `&page=${randomPage}` +
-                    `&page_size=10` +
-                    `&fields=code,product_name,image_front_url,allergens_tags` +
-                    `&countries_tags=en:czechia`;
-
-                const res = await fetch(url, {
-                    headers: { 'User-Agent': 'AllergenChecker/1.0 (jitka@email.com)' },
-                });
+                const url = `${API_BASE_URL}/api/products/recommended?page=${randomPage}`;
+                const res = await fetch(url);
 
                 const text = await res.text();
                 if (!text.trim().startsWith('{') && !text.trim().startsWith('[')) {

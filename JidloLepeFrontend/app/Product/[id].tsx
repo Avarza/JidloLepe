@@ -381,21 +381,16 @@ export default function ProductDetail() {
 
 async function fetchProduct(id: string, token: string | null): Promise<ProductData | null> {
     try {
-        const res = await fetch(
-            `https://world.openfoodfacts.org/api/v2/product/${id}?fields=product_name,image_url,ingredients_text,ingredients_text_cz,ingredients_text_en,ingredients_text_de,ingredients_text_fr,ingredients_text_pl,ingredients_text_sk,brands,quantity,nutriscore_grade,nutriments`
-        );
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+            headers,
+        });
         const data = await res.json();
         const product = data.product ?? null;
-        if (token) {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 4000);
-            fetch(`${API_BASE_URL}/api/products/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-                signal: controller.signal,
-            })
-                .then(() => clearTimeout(timeout))
-                .catch(() => clearTimeout(timeout));
-        }
         return product;
     } catch (err) {
         console.error('Chyba při načítání produktu z OFF:', err);
