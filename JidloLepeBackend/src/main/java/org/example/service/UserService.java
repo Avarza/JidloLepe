@@ -1,12 +1,20 @@
 package org.example.service;
 
 import org.example.dto.ChangePasswordDTO;
+import org.example.dto.FavoriteProductDTO;
+import org.example.dto.ProductNoteDTO;
 import org.example.dto.ScanHistoryDTO;
 import org.example.dto.UserDTO;
 import org.example.entity.Allergen;
+import org.example.entity.DietPreference;
+import org.example.entity.FavoriteProduct;
+import org.example.entity.ProductNote;
 import org.example.entity.ScanHistory;
 import org.example.entity.User;
 import org.example.repository.AllergenRepository;
+import org.example.repository.DietPreferenceRepository;
+import org.example.repository.FavoriteProductRepository;
+import org.example.repository.ProductNoteRepository;
 import org.example.repository.ScanHistoryRepository;
 import org.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +36,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final AllergenRepository allergenRepository;
     private final ScanHistoryRepository scanHistoryRepository;
+    private final FavoriteProductRepository favoriteProductRepository;
+    private final ProductNoteRepository productNoteRepository;
+    private final DietPreferenceRepository dietPreferenceRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir:uploads/avatars}")
@@ -37,10 +48,16 @@ public class UserService {
     public UserService(UserRepository userRepository,
                        AllergenRepository allergenRepository,
                        ScanHistoryRepository scanHistoryRepository,
+                       FavoriteProductRepository favoriteProductRepository,
+                       ProductNoteRepository productNoteRepository,
+                       DietPreferenceRepository dietPreferenceRepository,
                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.allergenRepository = allergenRepository;
         this.scanHistoryRepository = scanHistoryRepository;
+        this.favoriteProductRepository = favoriteProductRepository;
+        this.productNoteRepository = productNoteRepository;
+        this.dietPreferenceRepository = dietPreferenceRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -53,10 +70,11 @@ public class UserService {
     public UserDTO updateUserAllergens(UserDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
-        Set<Allergen> allergens = new HashSet<>(allergenRepository.findAllById(dto.getAllergenIds()));
+        Set<Long> allergenIds = dto.getAllergenIds() == null ? Set.of() : dto.getAllergenIds();
+        Set<Allergen> allergens = new HashSet<>(allergenRepository.findAllById(allergenIds));
         user.setAllergens(allergens);
         userRepository.save(user);
-        return new UserDTO(user.getEmail(), dto.getAllergenIds());
+        return new UserDTO(user.getEmail(), allergenIds);
     }
 
     public Set<String> getUserAllergenNamesByEmail(String email) {
@@ -150,4 +168,114 @@ public class UserService {
 
         return "/avatars/" + filename;
     }
+
+    // Favorites
+    public List<FavoriteProductDTO> getFavorites(String email) {
+        return favoriteProductRepository.findByUserEmailOrderByCreatedAtDesc(email)
+                .stream()
+                .map(f -> new FavoriteProductDTO(
+                        f.getProductCode(),
+                        f.getProductName(),
+                        f.getImageUrl(),
+                        f.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public void addFavorite(String email, String productCode, String productName, String imageUrl) {
+        if (productCode == null || productCode.isBlank()) {
+            throw new RuntimeException("Kód produktu je povinný");
+        }
+
+        boolean exists = favoriteProductRepository
+                .findByUserEmailAndProductCode(email, productCode)
+                .isPresent();
+        if (exists) return;
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        FavoriteProduct favorite = new FavoriteProduct();
+        favorite.setUser(user);
+        favorite.setProductCode(productCode);
+        favorite.setProductName(productName);
+        favorite.setImageUrl(imageUrl);
+        favoriteProductRepository.save(favorite);
+    }
+
+    public void removeFavorite(String email, String productCode) {
+        favoriteProductRepository.deleteByUserEmailAndProductCode(email, productCode);
+    }
+
+    public boolean isFavorite(String email, String productCode) {
+        return favoriteProductRepository.findByUserEmailAndProductCode(email, productCode).isPresent();
+    }
+
+    // Product notes
+    public ProductNoteDTO getProductNote(String email, String productCode) {
+        ProductNote note = productNoteRepository.findByUserEmailAndProductCode(email, productCode).orElse(null);
+        if (note == null) {
+            return new ProductNoteDTO(productCode, "", null);
+        }
+        return new ProductNoteDTO(note.getProductCode(), note.getNote(), note.getUpdatedAt());
+    }
+
+    public ProductNoteDTO saveProductNote(String email, String productCode, String noteText) {
+        if (productCode == null || productCode.isBlank()) {
+            throw new RuntimeException("Kód produktu je povinný");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        String sanitized = noteText == null ? "" : noteText.trim();
+        if (sanitized.length() > 800) {
+            throw new RuntimeException("Poznámka může mít maximálně 800 znaků");
+        }
+
+        ProductNote note = productNoteRepository.findByUserEmailAndProductCode(email, productCode)
+                .orElseGet(ProductNote::new);
+        note.setUser(user);
+        note.setProductCode(productCode);
+        note.setNote(sanitized);
+        note.setUpdatedAt(java.time.LocalDateTime.now());
+
+        ProductNote saved = productNoteRepository.save(note);
+        return new ProductNoteDTO(saved.getProductCode(), saved.getNote(), saved.getUpdatedAt());
+    }
+
+    // Diet preferences
+    public List<String> getDietPreferences(String email) {
+        return dietPreferenceRepository.findByUserEmailOrderByCreatedAtDesc(email)
+                .stream()
+                .map(DietPreference::getPreferenceCode)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> updateDietPreferences(String email, List<String> preferences) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Uživatel nenalezen"));
+
+        List<String> sanitized = preferences == null
+                ? List.of()
+                : preferences.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
+
+        dietPreferenceRepository.deleteByUserEmail(email);
+
+        List<DietPreference> rows = new ArrayList<>();
+        for (String preference : sanitized) {
+            DietPreference row = new DietPreference();
+            row.setUser(user);
+            row.setPreferenceCode(preference);
+            rows.add(row);
+        }
+        dietPreferenceRepository.saveAll(rows);
+        return sanitized;
+    }
 }
+

@@ -20,6 +20,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -28,9 +31,11 @@ public class ProductProxyController {
 
     private static final String OPEN_FOOD_FACTS_BASE_URL = "https://world.openfoodfacts.org";
     private static final String USER_AGENT = "JidloLepe/1.0 (contact: support@jidlolepe.local)";
+    private static final String EMPTY_PRODUCTS_JSON = "{\"count\":0,\"page\":1,\"page_size\":10,\"products\":[]}";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private volatile String recommendedCacheJson = EMPTY_PRODUCTS_JSON;
 
     @Autowired
     private UserService userService;
@@ -63,6 +68,30 @@ public class ProductProxyController {
         return response.getBody();
     }
 
+    private boolean isLikelyJson(String body) {
+        if (body == null) return false;
+        String trimmed = body.trim();
+        return trimmed.startsWith("{") || trimmed.startsWith("[");
+    }
+
+    private String fetchFirstJson(List<String> urls) {
+        Exception lastException = null;
+        for (String url : urls) {
+            try {
+                String body = fetchOpenFoodFacts(url);
+                if (isLikelyJson(body)) {
+                    return body;
+                }
+            } catch (Exception e) {
+                lastException = e;
+            }
+        }
+        if (lastException != null) {
+            throw new RuntimeException(lastException);
+        }
+        throw new RuntimeException("No valid JSON response from OpenFoodFacts");
+    }
+
     @GetMapping("/snacks")
     public ResponseEntity<String> getSnackProducts() {
         String url = OPEN_FOOD_FACTS_BASE_URL + "/cgi/search.pl?" +
@@ -71,7 +100,7 @@ public class ProductProxyController {
         try {
             return ResponseEntity.ok(fetchOpenFoodFacts(url));
         } catch (Exception e) {
-            return ResponseEntity.status(502).body("{\"error\":\"OpenFoodFacts API nedostupné\"}");
+            return ResponseEntity.ok(EMPTY_PRODUCTS_JSON);
         }
     }
 
@@ -82,40 +111,67 @@ public class ProductProxyController {
                 "&categories_tags=en:snacks" +
                 "&fields=code,product_name,image_front_url";
         try {
-            return ResponseEntity.ok(fetchOpenFoodFacts(url));
+            String body = fetchOpenFoodFacts(url);
+            if (isLikelyJson(body)) {
+                return ResponseEntity.ok(body);
+            }
+            return ResponseEntity.ok(EMPTY_PRODUCTS_JSON);
         } catch (Exception e) {
-            System.err.println("Chyba při načítání základních produktů: " + e.getMessage());
-            return ResponseEntity.status(502).body("{\"error\":\"OpenFoodFacts API nedostupné\"}");
+            return ResponseEntity.ok(EMPTY_PRODUCTS_JSON);
         }
     }
 
     @GetMapping("/search")
     public ResponseEntity<String> searchProducts(@RequestParam("query") String query) {
-        String url = OPEN_FOOD_FACTS_BASE_URL + "/api/v2/search?" +
-                "search_terms=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        String urlV2 = OPEN_FOOD_FACTS_BASE_URL + "/api/v2/search?" +
+                "search_terms=" + encodedQuery +
                 "&page_size=20" +
                 "&fields=code,product_name,image_front_url";
+        String urlCgi = OPEN_FOOD_FACTS_BASE_URL + "/cgi/search.pl?" +
+                "search_terms=" + encodedQuery +
+                "&search_simple=1&action=process&json=1&page_size=20" +
+                "&fields=code,product_name,image_front_url";
+
         try {
-            return ResponseEntity.ok(fetchOpenFoodFacts(url));
+            String body = fetchFirstJson(List.of(urlV2, urlCgi));
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
-            System.err.println("Chyba při vyhledávání produktů: " + e.getMessage());
-            return ResponseEntity.status(502).body("{\"error\":\"Vyhledávání produktů není dostupné\"}");
+            return ResponseEntity.ok(EMPTY_PRODUCTS_JSON);
         }
     }
 
     @GetMapping("/recommended")
     public ResponseEntity<String> getRecommendedProducts(@RequestParam(value = "page", defaultValue = "1") int page) {
-        String url = OPEN_FOOD_FACTS_BASE_URL + "/api/v2/search?" +
-                "sort_by=unique_scans_n" +
-                "&page=" + Math.max(page, 1) +
-                "&page_size=10" +
-                "&fields=code,product_name,image_front_url,allergens_tags" +
-                "&countries_tags=en:czechia";
+        int safePage = Math.max(page, 1);
+        List<String> urls = new ArrayList<>();
+
+        for (int i = 0; i < 6; i++) {
+            int candidate = ((safePage + i - 1) % 50) + 1;
+            urls.add(OPEN_FOOD_FACTS_BASE_URL + "/api/v2/search?" +
+                    "sort_by=unique_scans_n" +
+                    "&page=" + candidate +
+                    "&page_size=10" +
+                    "&fields=code,product_name,image_front_url,allergens_tags" +
+                    "&countries_tags=en:czechia");
+        }
+
+        for (int i = 0; i < 4; i++) {
+            int randomPage = ThreadLocalRandom.current().nextInt(1, 51);
+            urls.add(OPEN_FOOD_FACTS_BASE_URL + "/api/v2/search?" +
+                    "sort_by=unique_scans_n" +
+                    "&page=" + randomPage +
+                    "&page_size=10" +
+                    "&fields=code,product_name,image_front_url,allergens_tags" +
+                    "&countries_tags=en:czechia");
+        }
+
         try {
-            return ResponseEntity.ok(fetchOpenFoodFacts(url));
+            String body = fetchFirstJson(urls);
+            recommendedCacheJson = body;
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
-            System.err.println("Chyba při načítání doporučených produktů: " + e.getMessage());
-            return ResponseEntity.status(502).body("{\"error\":\"Doporučené produkty nejsou dostupné\"}");
+            return ResponseEntity.ok(recommendedCacheJson);
         }
     }
 
@@ -146,14 +202,13 @@ public class ProductProxyController {
                         userService.addToHistory(email, id, productName, imageUrl);
                     }
                 } catch (Exception parseEx) {
-                    System.err.println("Chyba při ukládání historie: " + parseEx.getMessage());
+                    System.err.println("History save failed: " + parseEx.getMessage());
                 }
             }
 
             return ResponseEntity.ok(result);
-
         } catch (Exception e) {
-            return ResponseEntity.status(502).body("{\"error\":\"Produkt nenalezen\"}");
+            return ResponseEntity.status(502).body("{\"error\":\"Product not found\"}");
         }
     }
 }

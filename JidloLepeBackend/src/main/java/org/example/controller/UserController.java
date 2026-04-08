@@ -2,6 +2,9 @@ package org.example.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.example.dto.ChangePasswordDTO;
+import org.example.dto.DietPreferencesDTO;
+import org.example.dto.FavoriteProductDTO;
+import org.example.dto.ProductNoteDTO;
 import org.example.dto.ScanHistoryDTO;
 import org.example.dto.UserDTO;
 import org.example.service.UserService;
@@ -35,7 +38,11 @@ public class UserController {
     // ── Existing allergen endpoints ───────────────────────────────────────────
 
     @PutMapping("/allergens")
-    public UserDTO updateUserAllergens(@RequestBody UserDTO dto) {
+    public UserDTO updateUserAllergens(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody UserDTO dto) {
+        String email = emailFromHeader(authHeader);
+        dto.setEmail(email);
         return userService.updateUserAllergens(dto);
     }
 
@@ -117,5 +124,78 @@ public class UserController {
             return ResponseEntity.ok(Map.of("avatarUrl", ""));
         }
         return ResponseEntity.ok(Map.of("avatarUrl", "/avatars/" + user.getAvatarPath()));
+    }
+
+    // Favorites
+    @GetMapping("/favorites")
+    public ResponseEntity<List<FavoriteProductDTO>> getFavorites(
+            @RequestHeader("Authorization") String authHeader) {
+        String email = emailFromHeader(authHeader);
+        return ResponseEntity.ok(userService.getFavorites(email));
+    }
+
+    @PostMapping("/favorites")
+    public ResponseEntity<?> addFavorite(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> body) {
+        String email = emailFromHeader(authHeader);
+        userService.addFavorite(
+                email,
+                body.get("productCode"),
+                body.get("productName"),
+                body.get("imageUrl")
+        );
+        return ResponseEntity.ok(Map.of("message", "Produkt přidán do oblíbených"));
+    }
+
+    @DeleteMapping("/favorites/{productCode}")
+    public ResponseEntity<?> removeFavorite(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String productCode) {
+        String email = emailFromHeader(authHeader);
+        userService.removeFavorite(email, productCode);
+        return ResponseEntity.ok(Map.of("message", "Produkt odebrán z oblíbených"));
+    }
+
+    @GetMapping("/favorites/{productCode}/exists")
+    public ResponseEntity<?> isFavorite(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String productCode) {
+        String email = emailFromHeader(authHeader);
+        return ResponseEntity.ok(Map.of("isFavorite", userService.isFavorite(email, productCode)));
+    }
+
+    // Product notes
+    @GetMapping("/notes/{productCode}")
+    public ResponseEntity<ProductNoteDTO> getProductNote(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String productCode) {
+        String email = emailFromHeader(authHeader);
+        return ResponseEntity.ok(userService.getProductNote(email, productCode));
+    }
+
+    @PutMapping("/notes/{productCode}")
+    public ResponseEntity<ProductNoteDTO> saveProductNote(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String productCode,
+            @RequestBody Map<String, String> body) {
+        String email = emailFromHeader(authHeader);
+        return ResponseEntity.ok(userService.saveProductNote(email, productCode, body.get("note")));
+    }
+
+    // Diet preferences
+    @GetMapping("/diet-preferences")
+    public ResponseEntity<?> getDietPreferences(
+            @RequestHeader("Authorization") String authHeader) {
+        String email = emailFromHeader(authHeader);
+        return ResponseEntity.ok(Map.of("preferences", userService.getDietPreferences(email)));
+    }
+
+    @PutMapping("/diet-preferences")
+    public ResponseEntity<?> updateDietPreferences(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody DietPreferencesDTO dto) {
+        String email = emailFromHeader(authHeader);
+        return ResponseEntity.ok(Map.of("preferences", userService.updateDietPreferences(email, dto.getPreferences())));
     }
 }
