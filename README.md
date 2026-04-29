@@ -1,167 +1,438 @@
-# 1. Jídlo Lépe – Backend & Frontend
+# Jídlo Lépe – Backend & Frontend
 
-> Semestrální projekt: Aplikace pro správu alergenů a uživatelů – mobilní frontend v React Native a zabezpečený backend ve Spring Boot
+> Bakalářský projekt: Mobilní aplikace pro alergiky umožňující skenování čárových kódů produktů a porovnání složení s alergenem přihlášeného uživatele. Backend v Spring Boot, mobilní frontend v React Native (Expo).
 
-## 2. Cíl projektu
+---
 
-Cílem této práce je navrhnout a implementovat plně funkční backend i frontend systému „Jídlo Lépe“ pro alergiky, který:
+## Obsah
 
-* umožňuje správu uživatelů a jejich alergenů
-* využívá JWT autentizaci a role-based autorizaci
-* podporuje validaci dat a logování
-* poskytuje REST API pro mobilní aplikaci
-* umožňuje skenování čárových kódů a porovnání složení s alergenem uživatele
+1. [Cíl projektu](#1-cíl-projektu)
+2. [Architektura systému](#2-architektura-systému)
+3. [Backend – Spring Boot](#3-backend--spring-boot)
+4. [Frontend – React Native (Expo)](#4-frontend--react-native-expo)
+5. [Bezpečnostní mechanismy](#5-bezpečnostní-mechanismy)
+6. [REST API reference](#6-rest-api-reference)
+7. [Spuštění projektu](#7-spuštění-projektu)
+8. [Struktura projektu](#8-struktura-projektu)
+9. [Kontakt](#9-kontakt)
 
-## 3. Architektura systému
+---
 
-Aplikace je rozdělena do dvou částí – backend a frontend – propojené pomocí REST API.
+## 1. Cíl projektu
 
-### Backend (Spring Boot)
+Cílem práce je navrhnout a implementovat systém „Jídlo Lépe", který:
 
-* **Entity** – `User`, `Allergen`, `Role`
-* **DTO** – `UserDTO`, `LoginDTO`, `AuthResponse`
-* **Repository** – `UserRepository`, `AllergenRepository`
-* **Service** – `UserService`, `AuthService`
-* **Controller** – `UserController`, `AuthController`
-* **Security** – `SecurityConfig`, `JwtFilter`, `JwtUtil`
+- umožňuje uživatelům spravovat svůj seznam alergenů
+- po naskenování čárového kódu produktu porovná složení s alergenem uživatele
+- využívá JWT autentizaci pro zabezpečení přístupu
+- komunikuje s externím API OpenFoodFacts pro data o produktech
+- je ovladatelný jako mobilní aplikace (Android/iOS) přes Expo Go
 
-### Frontend (React Native + Expo Router)
+---
 
-* **Stránky:** login, fav, profile, product detail (`[id].tsx`), scan
-* **Autentizace** – uložení JWT pomocí `AsyncStorage`
-* **Context API** – `authContext` pro správu stavu přihlášení
-* **CameraView** – Expo kamera pro čtení čárových kódů
-* **Porovnání alergenů** – nahrané alergeny vs složení produktu
+## 2. Architektura systému
 
-## 4. Bezpečnostní mechanismy
+```
+┌─────────────────────────┐        REST API        ┌──────────────────────────────┐
+│   React Native (Expo)   │ ◄────────────────────► │   Spring Boot backend        │
+│   mobilní frontend      │   JWT v hlavičce        │   port 8082                  │
+└─────────────────────────┘                         └──────────┬───────────────────┘
+                                                               │
+                                                    ┌──────────▼───────────────────┐
+                                                    │   PostgreSQL databáze         │
+                                                    │   db: jidlolepe              │
+                                                    └──────────────────────────────┘
 
-* **JWT autentizace** – uživatel získá token po přihlášení a posílá jej v hlavičce `Authorization: Bearer <token>`
-* **Role-based access control** – `ADMIN`, `USER`, `EDITOR`
-* **Ochrana endpointů** – jen oprávnění uživatelé mohou volat určité API
-
-## 5. Validace
-
-* Validace emailu a hesla v `LoginDTO`
-* Validace ID a seznamu alergenů v `UserDTO`
-
-Při chybném vstupu je vrácen srozumitelný výstup s HTTP stavovým kódem:
-
-```json
-HTTP/1.1 400 Bad Request
-Content-Type: application/json
-{
-  "error": "Email is required"
-}
+Produktová data: OpenFoodFacts API (https://world.openfoodfacts.org)
 ```
 
-## 6. Ukázky API response
+Frontend i backend jsou oddělené projekty propojené přes HTTP REST API. Mobilní aplikace ukládá JWT token do `AsyncStorage` a přikládá jej ke každému autentizovanému požadavku v hlavičce `Authorization: Bearer <token>`.
 
-### 6.1 Úspěšný login
+---
+
+## 3. Backend – Spring Boot
+
+### 3.1 Technologický stack
+
+| Technologie | Verze |
+|---|---|
+| Java | 17+ |
+| Spring Boot | 3.2.5 |
+| Spring Security | (součást Boot) |
+| Spring Data JPA / Hibernate | (součást Boot) |
+| PostgreSQL JDBC driver | (součást Boot) |
+| JJWT | 0.11.5 |
+| Springdoc OpenAPI (Swagger) | 2.1.0 |
+| Lombok | (součást Boot) |
+
+### 3.2 Datový model
+
+**Entity:**
+
+- `User` – uživatel s emailem, heslem (bcrypt), vazbou na role a alergeny
+- `Allergen` – alergen s názvem, URL ikony a mapou překladů (`Map<String, String>`)
+- `Role` – role uživatele (např. `ROLE_USER`, `ROLE_ADMIN`)
+
+**Vztahy:**
+
+- `User` ↔ `Allergen` – many-to-many, spojovací tabulka `user_allergens`
+- `User` ↔ `Role` – many-to-many, spojovací tabulka `users_roles`
+- `Allergen` → překlady – element collection v tabulce `allergen_translations`
+
+### 3.3 DTO
+
+| DTO | Účel |
+|---|---|
+| `LoginDTO` | Email a heslo pro přihlášení |
+| `RegisterDTO` | Email a heslo pro registraci |
+| `AuthResponse` | Odpověď s JWT tokenem po přihlášení |
+| `UserDTO` | Email uživatele + množina ID alergenů (`Set<Long>`) |
+| `UpdateUserAllergensDto` | Seznam ID alergenů poslaných frontendem |
+| `AllergenDTO` | Alergen s id, name, iconUrl a překlady |
+
+### 3.4 Controllery
+
+| Controller | Endpoint prefix | Popis |
+|---|---|---|
+| `AuthController` | `/api/auth` | Přihlášení (vydání JWT) |
+| `UserController` | `/api/users` | Správa alergenů přihlášeného uživatele |
+| `AllergenController` | `/api/allergens` | Výpis všech dostupných alergenů |
+| `ProductProxyController` | `/api/products` | Proxy na OpenFoodFacts API |
+
+### 3.5 Services
+
+- `AuthService` / `AuthServiceImpl` – ověření přihlašovacích údajů, generování JWT
+- `UserService` – načtení a uložení alergenů uživatele
+- `AllergenService` – výpis alergenů z databáze
+- `UserDetailsServiceImpl` – integrace s Spring Security (načtení uživatele podle emailu)
+
+### 3.6 Konfigurace databáze
+
+Nastavení v `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/jidlolepe
+spring.datasource.username=jidlolepeadmin
+spring.datasource.password=admin
+spring.datasource.driver-class-name=org.postgresql.Driver
+server.port=8082
+server.address=0.0.0.0
+spring.jpa.hibernate.ddl-auto=update
+```
+
+---
+
+## 4. Frontend – React Native (Expo)
+
+### 4.1 Technologický stack
+
+- React Native + Expo Router (file-based routing)
+- TypeScript
+- AsyncStorage (ukládání JWT tokenu)
+- Context API (`authContext`) – správa stavu přihlášení
+- Expo Camera (`CameraView`) – skenování čárových kódů
+- NativeWind / Tailwind CSS – stylování
+- Axios + `fetch` – HTTP komunikace
+
+### 4.2 Obrazovky
+
+| Soubor | Cesta | Popis |
+|---|---|---|
+| `app/(tabs)/index.tsx` | `/` | Hlavní obrazovka |
+| `app/(tabs)/scan.tsx` | `/scan` | Skenování čárového kódu (EAN-13, EAN-8, QR, …) |
+| `app/(tabs)/profile.tsx` | `/profile` | Přihlášení / profil uživatele, zobrazení alergenů |
+| `app/(tabs)/fav.tsx` | `/fav` | Oblíbené produkty |
+| `app/(tabs)/search.tsx` | `/search` | Vyhledávání produktů |
+| `app/Product/[id].tsx` | `/Product/:id` | Detail produktu – složení + kontrola alergenů |
+| `app/AuthScreen.tsx` | `/AuthScreen` | Přihlašovací obrazovka |
+
+### 4.3 Konfigurace API
+
+URL backendu je definována v `config/api.ts`:
+
+```ts
+export const API_BASE_URL = 'http://<IP_BACKENDU>:8082';
+```
+
+Při vývoji přes Expo Go je nutné nastavit IP adresu počítače v lokální síti (nikoliv `localhost`), protože fyzický mobilní telefon nemůže dosáhnout na `localhost` vývojářského stroje.
+
+### 4.4 Autentizace ve frontendu
+
+1. Uživatel zadá email a heslo na obrazovce `/profile` (nebo `AuthScreen`).
+2. Frontend pošle `POST /api/auth/login` s `{ email, password }`.
+3. Backend vrátí `{ token: "..." }` – JWT token se uloží do `AsyncStorage`.
+4. Při každém chráněném požadavku se token přikládá: `Authorization: Bearer <token>`.
+5. Alergeny uživatele se načítají z `GET /api/users/allergens` a ukládají do `AsyncStorage` pod klíčem `user_allergens`.
+
+### 4.5 Skenování a kontrola alergenů
+
+1. Obrazovka `/scan` aktivuje `CameraView` s podporou čárových kódů (EAN-13, EAN-8, UPC, Code128, QR).
+2. Po naskenování přejde aplikace na `/Product/<id>`.
+3. Detail produktu načte data přímo z `https://world.openfoodfacts.org/api/v0/product/<id>.json`.
+4. Složení produktu se porovná s alergeny uloženými v `AsyncStorage` a výsledek je vizuálně zobrazen uživateli.
+
+---
+
+## 5. Bezpečnostní mechanismy
+
+- **JWT autentizace** – po přihlášení je vydán podepsaný JWT token; expirační doba je nakonfigurována v `JwtUtil`
+- **JwtRequestFilter** – Spring Security filter, který před každým požadavkem ověří platnost tokenu z hlavičky `Authorization: Bearer <token>`
+- **Role-based access control** – entity `Role` (např. `ROLE_USER`, `ROLE_ADMIN`); endpointy jsou zabezpečeny dle role v `SecurityConfig`
+- **BCrypt** – hesla uživatelů jsou hashována, nikdy se neukládají v čitelné podobě
+- **CORS** – `@CrossOrigin("*")` na `AuthController` a `ProductProxyController` pro přístup z mobilní aplikace
+
+---
+
+## 6. REST API reference
+
+### 6.1 Autentizace
+
+#### Přihlášení
 
 ```http
 POST /api/auth/login
+Content-Type: application/json
 ```
 
+Tělo požadavku:
+```json
+{
+  "email": "jan@example.com",
+  "password": "heslo123"
+}
+```
+
+Odpověď `200 OK`:
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR..."
 }
 ```
 
-### 6.2 Aktualizace alergenů
+Odpověď `401 Unauthorized` při neplatných přihlašovacích údajích:
+```
+Neplatný email nebo heslo
+```
+
+---
+
+### 6.2 Alergeny uživatele
+
+#### Načtení alergenů přihlášeného uživatele
+
+```http
+GET /api/users/allergens
+Authorization: Bearer <token>
+```
+
+Odpověď `200 OK`:
+```json
+["Lepek", "Mléko", "Vejce"]
+```
+
+#### Uložení alergenů uživatele
 
 ```http
 PUT /api/users/allergens
 Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
+Tělo požadavku (ID alergenů z číselníku):
 ```json
 {
-  "allergens": ["Lepek", "Mléko"]
+  "email": "jan@example.com",
+  "allergenIds": [1, 3, 5]
 }
 ```
 
-```json
-{
-  "email": "jitka@example.com",
-  "allergens": ["Lepek", "Mléko"]
-}
+Odpověď `200 OK` – vrátí aktualizovaný `UserDTO`.
+
+---
+
+### 6.3 Číselník alergenů
+
+#### Výpis všech dostupných alergenů
+
+```http
+GET /api/allergens
+Authorization: Bearer <token>
 ```
 
-## 7. Dokumentace API (Swagger)
+Odpověď `200 OK`:
+```json
+[
+  {
+    "id": 1,
+    "name": "Lepek",
+    "iconUrl": "https://example.com/icons/lepek.png",
+    "translations": {
+      "en": "Gluten",
+      "de": "Gluten",
+      "cz": "Lepek"
+    }
+  }
+]
+```
 
-Swagger UI je dostupné po spuštění aplikace na:
+---
+
+### 6.4 Produktová data (proxy na OpenFoodFacts)
+
+Backend poskytuje proxy endpointy, které přeposílají požadavky na OpenFoodFacts API. Frontend v detailu produktu volá OpenFoodFacts přímo.
+
+#### Detail produktu podle čárového kódu
+
+```http
+GET /api/products/{id}
+```
+
+Přeposílá na `https://world.openfoodfacts.org/api/v0/product/{id}.json`.
+
+#### Výpis snacků (ukázka)
+
+```http
+GET /api/products/snacks
+GET /api/products/
+```
+
+Odpověď `502 Bad Gateway` při nedostupnosti OpenFoodFacts:
+```json
+{"error": "OpenFoodFacts API nedostupné"}
+```
+
+---
+
+### 6.5 Swagger UI
+
+Po spuštění backendu je interaktivní dokumentace dostupná na:
 
 ```
 http://localhost:8082/swagger-ui/index.html
 ```
 
-## 8. Logování a monitoring
+---
 
-* Logování pomocí SLF4J + Logback
-* Logování přístupů a chyb v `AuthService`, `JwtUtil`, `UserService`
-## 9. Spuštění projektu
+## 7. Spuštění projektu
 
-### 9.1 Backend
+### 7.1 Backend
 
-#### Požadavky:
+**Požadavky:**
+- Java 17+
+- Maven
+- PostgreSQL (databáze `jidlolepe`, uživatel `jidlolepeadmin`)
 
-* Java 17+
-* Maven
-* PostgreSQL
+**Vytvoření databáze (PostgreSQL):**
+```sql
+CREATE DATABASE jidlolepe;
+CREATE USER jidlolepeadmin WITH PASSWORD 'admin';
+GRANT ALL PRIVILEGES ON DATABASE jidlolepe TO jidlolepeadmin;
+```
 
-#### Spuštění:
-
+**Spuštění:**
 ```bash
+cd JidloLepeBackend
 ./mvnw spring-boot:run
 ```
 
-### 9.2 Frontend
+Backend naslouchá na portu `8082` (`0.0.0.0:8082`). Schéma databáze se vytvoří automaticky (`ddl-auto=update`).
 
-#### Požadavky:
+---
 
-* Node.js, npm
-* Expo CLI (`npm install -g expo-cli`)
+### 7.2 Frontend
 
-#### Spuštění:
+**Požadavky:**
+- Node.js (LTS) + npm
+- Expo Go aplikace na mobilním zařízení
 
+**Instalace a spuštění:**
 ```bash
+cd JidloLepeFrontend
 npm install
-npm start
+npx expo start
 ```
 
-#### Přístup z mobilu:
+**Nastavení IP adresy backendu:**
 
-Aplikace je vyvíjena pomocí **Expo Go** – připojením telefonu ke stejné WiFi síti lze testovat přes QR kód.
+Před spuštěním otevřete `config/api.ts` a nastavte IP adresu počítače, na kterém běží backend:
 
-## 10. Struktura backend projektu
-
-```
-├── controller
-│   ├── AuthController.java
-│   └── UserController.java
-├── dto
-│   ├── LoginDTO.java
-│   ├── AuthResponse.java
-│   └── UserDTO.java
-├── entity
-│   ├── User.java
-│   ├── Role.java
-│   └── Allergen.java
-├── repository
-│   └── UserRepository.java
-├── service
-│   ├── AuthService.java
-│   └── UserService.java
-├── security
-│   ├── SecurityConfig.java
-│   ├── JwtUtil.java
-│   └── JwtRequestFilter.java
-└── ...
+```ts
+export const API_BASE_URL = 'http://192.168.x.x:8082';
 ```
 
-## 11. Kontakt
+**Přístup z mobilu:**
 
-Autor: **Jitka Kroupová** – studentem UPCE FEI
+Připojte telefon ke stejné WiFi síti jako vývojářský stroj a naskenujte QR kód zobrazený po spuštění `expo start` v aplikaci Expo Go.
 
-Repozitář: [github.com/avarza1/jidlolepe](https://github.com/Avarza/jidlolepe)
+---
+
+## 8. Struktura projektu
+
+```
+JidloLepe/
+├── JidloLepeBackend/
+│   └── src/main/java/org/example/
+│       ├── JidloLepeApp.java               # Vstupní bod aplikace
+│       ├── controller/
+│       │   ├── AuthController.java         # POST /api/auth/login
+│       │   ├── UserController.java         # GET/PUT /api/users/allergens
+│       │   ├── AllergenController.java     # GET /api/allergens
+│       │   └── ProductProxyController.java # GET /api/products/*
+│       ├── dto/
+│       │   ├── LoginDTO.java
+│       │   ├── RegisterDTO.java
+│       │   ├── AuthResponse.java
+│       │   ├── UserDTO.java
+│       │   ├── AllergenDTO.java
+│       │   └── UpdateUserAllergensDto.java
+│       ├── entity/
+│       │   ├── User.java
+│       │   ├── Allergen.java
+│       │   └── Role.java
+│       ├── repository/
+│       │   ├── UserRepository.java
+│       │   ├── AllergenRepository.java
+│       │   └── RoleRepository.java
+│       ├── service/
+│       │   ├── AuthService.java
+│       │   ├── AuthServiceImpl.java
+│       │   ├── UserService.java
+│       │   ├── AllergenService.java
+│       │   └── UserDetailsServiceImpl.java
+│       ├── security/
+│       │   ├── SecurityConfig.java
+│       │   ├── JwtUtil.java
+│       │   └── JwtRequestFilter.java
+│       └── swagger/
+│           └── SwaggerConfig.java
+│
+└── JidloLepeFrontend/
+    ├── app/
+    │   ├── (tabs)/
+    │   │   ├── index.tsx       # Hlavní obrazovka
+    │   │   ├── scan.tsx        # Skenování čárového kódu
+    │   │   ├── profile.tsx     # Profil / přihlášení
+    │   │   ├── fav.tsx         # Oblíbené
+    │   │   └── search.tsx      # Vyhledávání
+    │   ├── Product/
+    │   │   └── [id].tsx        # Detail produktu
+    │   └── AuthScreen.tsx
+    ├── context/
+    │   └── authContext.tsx     # Stav přihlášení (Context API)
+    ├── services/
+    │   ├── AuthService.ts      # login() – volání backendu
+    │   ├── allergenService.ts  # (pozůstatek – nepoužíváno, nahrazeno backendem)
+    │   └── openFoodFacts.ts    # searchProducts(), getProductByBarcode()
+    └── config/
+        └── api.ts              # API_BASE_URL – adresa backendu
+```
+
+> **Poznámka:** Soubor `services/allergenService.ts` obsahuje původní implementaci přes Firebase Firestore, která je v aktuální verzi nahrazena backendem. Soubor je zachován jako historický pozůstatek a v produkčním kódu se nepoužívá.
+
+---
+
+## 9. Kontakt
+
+Autor: **Jitka Kroupová** – studentka UPCE FEI
+
+Repozitář: [github.com/Avarza/jidlolepe](https://github.com/Avarza/jidlolepe)
