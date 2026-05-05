@@ -6,7 +6,6 @@
     "baseUrl": ".",             // Důležité pro aliasy
     "paths": {
       "@/*": ["./*"],
-      "types": ["firebase"]
     }
   },
   "include": [

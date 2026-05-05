@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -18,6 +19,9 @@ public class User {
 
     private String email;
     private String password;
+
+    // New: avatar stored as a path relative to upload dir
+    private String avatarPath;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -34,4 +38,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("scannedAt DESC")
+    private List<ScanHistory> scanHistory;
 }
