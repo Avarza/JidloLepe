@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     Text, View, Image, ScrollView, TouchableOpacity,
-    AppState, Animated
+    AppState, Animated, TextInput, Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import icons from "@/constants/icons";
 import allergensData from "@/assets/data/allergens.json";
 import { API_BASE_URL } from "@/config/api";
+import {
+    addFavorite,
+    getProductNote,
+    isFavorite as checkIsFavorite,
+    removeFavorite,
+    saveProductNote
+} from "@/services/userExtrasService";
+import { useAuth } from "@/context/authContext";
 
 interface Nutriments {
     energy_100g?: number;
@@ -61,8 +69,17 @@ function getFoundAllergens(productData: ProductData, userAllergens: string[]): s
     const lower = ingredients.toLowerCase();
     const found: string[] = [];
 
+    const normalizeAllergen = (value: string) =>
+        (value || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]/g, '');
+
+    const userSet = new Set(userAllergens.map(normalizeAllergen));
+
     for (const item of allergensData) {
-        if (!userAllergens.includes(item.cz)) continue;
+        if (!userSet.has(normalizeAllergen(item.cz))) continue;
         const terms = [
             item.cz,
             ...(item.en || []),
@@ -145,6 +162,7 @@ export default function ProductDetail() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { isLoggedIn, isAuthLoading } = useAuth();
 
     const [productData, setProductData] = useState<ProductData | null>(null);
     const [foundAllergens, setFoundAllergens] = useState<string[]>([]); // jen ty co jsou v produktu
@@ -152,6 +170,9 @@ export default function ProductDetail() {
     const [userAllergens, setUserAllergens] = useState<string[]>([]);
     const [overlayVisible, setOverlayVisible] = useState(true);
     const [loginRequired, setLoginRequired] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [note, setNote] = useState('');
+    const [savingNote, setSavingNote] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -160,14 +181,24 @@ export default function ProductDetail() {
         (async () => {
             const token = await AsyncStorage.getItem('token');
             const productPromise = fetchProduct(id as string, token);
-            const allergensPromise = token ? fetchAllergens(token) : Promise.resolve(null);
-            const [product, allergens] = await Promise.all([productPromise, allergensPromise]);
+            const canUseUserData = isLoggedIn && !!token;
+            const allergensPromise = canUseUserData ? fetchAllergens(token) : Promise.resolve(null);
+            const favoritesPromise = canUseUserData ? checkIsFavorite(id as string) : Promise.resolve(false);
+            const notePromise = canUseUserData ? getProductNote(id as string) : Promise.resolve('');
+            const [product, allergens, favoriteStatus, userNote] = await Promise.all([
+                productPromise,
+                allergensPromise,
+                favoritesPromise,
+                notePromise,
+            ]);
             if (cancelled) return;
 
             if (product) setProductData(product);
+            setIsFavorite(favoriteStatus);
+            setNote(userNote);
 
             if (allergens === null) {
-                setLoginRequired(!token ? true : false);
+                setLoginRequired(!isAuthLoading && !isLoggedIn);
                 setUserAllergens([]);
                 setHasAllergen(null);
                 setFoundAllergens([]);
@@ -185,14 +216,14 @@ export default function ProductDetail() {
         })();
 
         return () => { cancelled = true; };
-    }, [id]);
+    }, [id, isLoggedIn, isAuthLoading]);
 
     useEffect(() => {
         const sub = AppState.addEventListener("change", async (state) => {
             if (state !== "active") return;
             const token = await AsyncStorage.getItem("token");
-            if (!token) {
-                setLoginRequired(true);
+            if (isAuthLoading || !isLoggedIn || !token) {
+                setLoginRequired(!isAuthLoading && !isLoggedIn);
                 setUserAllergens([]);
                 setHasAllergen(null);
                 setFoundAllergens([]);
@@ -211,7 +242,7 @@ export default function ProductDetail() {
             }
         });
         return () => sub.remove();
-    }, [productData]);
+    }, [productData, isLoggedIn, isAuthLoading]);
 
     if (!productData) return <LoadingSkeleton />;
 
@@ -222,6 +253,48 @@ export default function ProductDetail() {
     const nutriGrade = productData.nutriscore_grade?.toLowerCase();
     const nutriCfg = nutriGrade ? NUTRISCORE[nutriGrade] : null;
     const n = productData.nutriments ?? {};
+
+    const toggleFavorite = async () => {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+            Alert.alert('Přihlášení', 'Pro oblíbené produkty se musíte přihlásit.');
+            return;
+        }
+
+        try {
+            if (isFavorite) {
+                await removeFavorite(id as string);
+                setIsFavorite(false);
+            } else {
+                await addFavorite({
+                    productCode: id as string,
+                    productName: productData.product_name,
+                    imageUrl: productData.image_url,
+                });
+                setIsFavorite(true);
+            }
+        } catch (e: any) {
+            Alert.alert('Chyba', e?.message ?? 'Nepodařilo se upravit oblíbené produkty');
+        }
+    };
+
+    const handleSaveNote = async () => {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+            Alert.alert('Přihlášení', 'Pro ukládání poznámek se musíte přihlásit.');
+            return;
+        }
+
+        setSavingNote(true);
+        try {
+            await saveProductNote(id as string, note);
+            Alert.alert('Uloženo', 'Poznámka byla uložena.');
+        } catch (e: any) {
+            Alert.alert('Chyba', e?.message ?? 'Nepodařilo se uložit poznámku');
+        } finally {
+            setSavingNote(false);
+        }
+    };
 
     return (
         <View className="flex-1 bg-[#F5EFE6]">
@@ -234,7 +307,7 @@ export default function ProductDetail() {
                     </Text>
                     <TouchableOpacity
                         className="bg-[#4CAF50] py-3 px-6 rounded-xl mt-2"
-                        onPress={() => router.push("/profile")}
+                        onPress={() => router.push("/(tabs)/profile")}
                     >
                         <Text className="text-white text-base font-bold">Přejít na přihlášení</Text>
                     </TouchableOpacity>
@@ -293,6 +366,14 @@ export default function ProductDetail() {
                 <View className="px-5 pt-5 gap-4">
 
                     <View>
+                        <View className="flex-row justify-end mb-2">
+                            <TouchableOpacity
+                                onPress={toggleFavorite}
+                                className={`rounded-full px-3 py-2 ${isFavorite ? 'bg-[#FFE7B3]' : 'bg-white border border-[#E0D4C4]'}`}
+                            >
+                                <Text className="text-sm">{isFavorite ? '⭐ Ulozeno' : '☆ Ulozit'}</Text>
+                            </TouchableOpacity>
+                        </View>
                         <Text className="text-2xl font-extrabold text-[#3D2314] leading-tight">
                             {productData.product_name || 'Neznámý produkt'}
                         </Text>
@@ -334,6 +415,29 @@ export default function ProductDetail() {
                     <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
                         <Text className="text-base font-bold text-[#3D2314] mb-3">Složení</Text>
                         <Text className="text-sm text-[#5C4033] leading-5">{ingredients}</Text>
+                    </View>
+
+                    <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
+                        <Text className="text-base font-bold text-[#3D2314] mb-2">Moje poznamky</Text>
+                        <TextInput
+                            value={note}
+                            onChangeText={setNote}
+                            placeholder="Napriklad: Chutna dobre, ale je moc sladke."
+                            placeholderTextColor="#A08070"
+                            multiline
+                            maxLength={800}
+                            className="bg-[#F5EFE6] border border-[#E0D4C4] rounded-xl px-3 py-3 text-sm text-[#3D2314]"
+                            style={{ minHeight: 96, textAlignVertical: 'top' }}
+                        />
+                        <TouchableOpacity
+                            className="mt-3 bg-[#764534] rounded-xl py-3 items-center"
+                            onPress={handleSaveNote}
+                            disabled={savingNote}
+                        >
+                            <Text className="text-white font-semibold text-sm">
+                                {savingNote ? 'Ukladam...' : 'Ulozit poznamku'}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     {/* ── Pouze nalezené alergeny ───────────────────────────── */}

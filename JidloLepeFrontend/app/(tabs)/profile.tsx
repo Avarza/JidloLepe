@@ -12,6 +12,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import icons from '@/constants/icons';
 import { API_BASE_URL } from "@/config/api";
+import {
+    getDietPreferences,
+    getFavorites,
+    updateDietPreferences
+} from "@/services/userExtrasService";
 
 // Deduplicate history by code, keeping most recent occurrence
 function deduplicateHistory(items: HistoryProduct[]): HistoryProduct[] {
@@ -28,6 +33,20 @@ interface HistoryProduct {
     name: string;
     image: string;
 }
+
+interface FavoriteProduct {
+    productCode: string;
+    productName?: string;
+    imageUrl?: string;
+}
+
+const DIET_OPTIONS = [
+    'vegan',
+    'vegetarian',
+    'gluten-free',
+    'lactose-free',
+    'low-sugar',
+];
 
 // ── Small allergen chip ───────────────────────────────────────────────────────
 function AllergenChip({ name }: { name: string }) {
@@ -69,7 +88,7 @@ function ActionRow({
 export default function ProfileTabScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { isLoggedIn, login, logout } = useAuth();
+    const { isLoggedIn, isAuthLoading, login, logout } = useAuth();
 
     // Login form
     const [email, setEmail] = useState('');
@@ -98,6 +117,10 @@ export default function ProfileTabScreen() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [changingPw, setChangingPw] = useState(false);
+    const [dietPreferences, setDietPreferences] = useState<string[]>([]);
+    const [favoritesCount, setFavoritesCount] = useState(0);
+    const [favorites, setFavorites] = useState<FavoriteProduct[]>([]);
+    const [savingDiet, setSavingDiet] = useState(false);
 
     // ── Login ─────────────────────────────────────────────────────────────────
     const handleLogin = async () => {
@@ -301,7 +324,66 @@ export default function ProfileTabScreen() {
         })();
     }, [isLoggedIn]);
 
+
+    const loadUserExtras = React.useCallback(async () => {
+        if (!isLoggedIn) {
+            setDietPreferences([]);
+            setFavoritesCount(0);
+            setFavorites([]);
+            return;
+        }
+        try {
+            const [preferences, favoritesResponse] = await Promise.all([
+                getDietPreferences(),
+                getFavorites(),
+            ]);
+            const normalizedFavorites = Array.isArray(favoritesResponse) ? favoritesResponse : [];
+            setDietPreferences(preferences);
+            setFavoritesCount(normalizedFavorites.length);
+            setFavorites(normalizedFavorites);
+        } catch {
+            setDietPreferences([]);
+            setFavoritesCount(0);
+            setFavorites([]);
+        }
+    }, [isLoggedIn]);
+
+    useEffect(() => {
+        loadUserExtras();
+    }, [loadUserExtras]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            loadUserExtras();
+        }, [loadUserExtras])
+    );
+
+    const toggleDietPreference = async (preference: string) => {
+        const next = dietPreferences.includes(preference)
+            ? dietPreferences.filter(item => item !== preference)
+            : [...dietPreferences, preference];
+
+        setDietPreferences(next);
+        setSavingDiet(true);
+        try {
+            await updateDietPreferences(next);
+        } catch (e: any) {
+            Alert.alert('Chyba', e?.message ?? 'Nepodarilo se ulozit dietni preference');
+            setDietPreferences(dietPreferences);
+        } finally {
+            setSavingDiet(false);
+        }
+    };
+
     // ── Not logged in ─────────────────────────────────────────────────────────
+    if (isAuthLoading) {
+        return (
+            <View className="flex-1 bg-[#F5EFE6] items-center justify-center">
+                <ActivityIndicator color="#764534" />
+            </View>
+        );
+    }
+
     if (!isLoggedIn) {
         return (
             <View className="flex-1 bg-[#F5EFE6]" style={{ paddingTop: insets.top }}>
@@ -500,6 +582,62 @@ export default function ProfileTabScreen() {
                             </View>
                         ) : (
                             <Text className="text-[#A08070] text-sm">Žádné alergeny uložené.</Text>
+                        )}
+                    </View>
+
+                    <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
+                        <Text className="font-bold text-[#3D2314] text-base mb-3">Dietni preference</Text>
+                        <View className="flex-row flex-wrap">
+                            {DIET_OPTIONS.map(option => {
+                                const selected = dietPreferences.includes(option);
+                                return (
+                                    <TouchableOpacity
+                                        key={option}
+                                        onPress={() => toggleDietPreference(option)}
+                                        disabled={savingDiet}
+                                        className={'rounded-full px-3 py-1 mr-2 mb-2 border ' + (selected ? 'bg-[#764534] border-[#764534]' : 'bg-[#F5EFE6] border-[#E0D4C4]')}
+                                    >
+                                        <Text className={selected ? 'text-white text-xs font-semibold' : 'text-[#5C4033] text-xs font-semibold'}>{option}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </View>
+
+                    <View className="bg-white rounded-2xl p-4 border border-[#EDE3D6]">
+                        <Text className="font-bold text-[#3D2314] text-base mb-1">Oblibene produkty</Text>
+                        <Text className="text-[#5C4033] text-sm">Mas ulozeno {favoritesCount} oblibenych produktu.</Text>
+                        {favorites.length > 0 ? (
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3">
+                                {favorites.map((favorite, index) => (
+                                    <TouchableOpacity
+                                        key={`${favorite.productCode}-${index}`}
+                                        className="mr-4 items-center"
+                                        style={{ width: 90 }}
+                                        onPress={() => router.push({
+                                            pathname: '/Product/[id]',
+                                            params: { id: favorite.productCode },
+                                        })}
+                                    >
+                                        {favorite.imageUrl ? (
+                                            <Image
+                                                source={{ uri: favorite.imageUrl }}
+                                                className="w-20 h-20 rounded-2xl mb-1 bg-[#F0E8DC]"
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <View className="w-20 h-20 rounded-2xl mb-1 bg-[#F0E8DC] items-center justify-center">
+                                                <Text className="text-2xl">🛒</Text>
+                                            </View>
+                                        )}
+                                        <Text className="text-[#3D2314] text-xs text-center font-medium" numberOfLines={2}>
+                                            {favorite.productName || 'Produkt'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        ) : (
+                            <Text className="text-[#A08070] text-sm mt-2">Zatim nemas zadne oblibene produkty.</Text>
                         )}
                     </View>
 

@@ -77,10 +77,31 @@ const Search = () => {
     useEffect(() => {
         (async () => {
             try {
-                const randomPage = Math.floor(Math.random() * 50) + 1;
-                const res = await fetch(`${API_BASE_URL}/api/products/recommended?page=${randomPage}`);
-                const data = await res.json();
-                if (data.products) setRandomProducts(data.products.filter((p: Product) => p.code));
+                let loaded = false;
+
+                // OFF byva nestabilni na nekterych pages, proto zkusime vice pokusu.
+                for (let i = 0; i < 5 && !loaded; i++) {
+                    const randomPage = Math.floor(Math.random() * 50) + 1;
+                    const res = await fetch(`${API_BASE_URL}/api/products/recommended?page=${randomPage}`);
+                    if (!res.ok) continue;
+
+                    const data = await res.json();
+                    const products = (data.products ?? []).filter((p: Product) => p.code);
+                    if (products.length > 0) {
+                        setRandomProducts(products);
+                        loaded = true;
+                    }
+                }
+
+                // Nouzovy fallback, aby search page nebyla prazdna.
+                if (!loaded) {
+                    const fallbackRes = await fetch(`${API_BASE_URL}/api/products/snacks`);
+                    if (fallbackRes.ok) {
+                        const fallbackData = await fallbackRes.json();
+                        const fallbackProducts = (fallbackData.products ?? []).filter((p: Product) => p.code);
+                        setRandomProducts(fallbackProducts);
+                    }
+                }
             } catch (e) {
                 console.error('Chyba při načítání náhodných produktů:', e);
             } finally {

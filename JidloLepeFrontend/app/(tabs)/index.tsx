@@ -74,9 +74,18 @@ const tagToName: Record<string, string> = {
 const CACHE_KEY = 'recommended_cache';
 const CACHE_TTL = 60 * 60 * 1000;
 
+function normalizeAllergen(value: string): string {
+    return (value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
 function getDangerousAllergens(product: Product, userAllergens: string[]): string[] {
     if (!product.allergens || userAllergens.length === 0) return [];
-    return product.allergens.filter(a => userAllergens.includes(a));
+    const userSet = new Set(userAllergens.map(normalizeAllergen));
+    return product.allergens.filter(a => userSet.has(normalizeAllergen(a)));
 }
 
 function SkeletonCard() {
@@ -171,7 +180,7 @@ function AllergenChip({ name }: { name: string }) {
 export default function Home() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, isAuthLoading } = useAuth();
 
     const [products, setProducts] = useState<Product[]>([]);
     const [recommended, setRecommended] = useState<Product[]>([]);
@@ -268,7 +277,7 @@ export default function Home() {
 
     // ── Načítání alergenů ─────────────────────────────────────────────────────
     const fetchUserAllergens = useCallback(async () => {
-        if (!isLoggedIn) { setUserAllergens([]); return; }
+        if (isAuthLoading || !isLoggedIn) { setUserAllergens([]); return; }
         const token = await AsyncStorage.getItem("token");
         if (!token) { setUserAllergens([]); return; }
         try {
@@ -291,7 +300,7 @@ export default function Home() {
         if (!isLoggedIn) {
             setUserAllergens([]);
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, isAuthLoading]);
 
     useFocusEffect(
         useCallback(() => {
@@ -340,7 +349,7 @@ export default function Home() {
                     </Pressable>
                 </Animated.View>
 
-                {isLoggedIn && userAllergens.length > 0 && warningCount > 0 && (
+                {!isAuthLoading && isLoggedIn && userAllergens.length > 0 && warningCount > 0 && (
                     <View className="mt-4 bg-red-50 border border-red-200 rounded-2xl p-4 flex-row items-start gap-3">
                         <Text className="text-2xl">⚠️</Text>
                         <View className="flex-1">
@@ -352,7 +361,7 @@ export default function Home() {
                     </View>
                 )}
 
-                {isLoggedIn && (
+                {!isAuthLoading && isLoggedIn && (
                     <View className="mt-6 bg-white rounded-2xl p-4 border border-[#E8DFD0]">
                         <View className="flex-row items-center justify-between mb-3">
                             <Text className="font-bold text-[#3D2314] text-base">Moje alergeny</Text>

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSegments, Tabs } from "expo-router";
 import { icons } from "@/constants/icons";
 import colors from "tailwindcss/colors";
-import { AuthProvider } from "@/context/authContext";
 
 type TabBarIconProps = {
     focused: boolean;
@@ -134,13 +133,4 @@ const LayoutContent = () => {
     );
 };
 
-// Wrapping the layout in the AuthProvider
-const _Layout = () => {
-    return (
-        <AuthProvider>
-            <LayoutContent />
-        </AuthProvider>
-    );
-};
-
-export default _Layout;
+export default LayoutContent;

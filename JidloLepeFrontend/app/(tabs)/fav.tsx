@@ -46,7 +46,7 @@ const allergenIdMap: { [key: string]: number } = {
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function FavScreen() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, isAuthLoading } = useAuth();
     const router = useRouter();
     const [selected, setSelected] = useState<string[]>([]);
     const [search, setSearch] = useState('');
@@ -77,7 +77,6 @@ export default function FavScreen() {
             if (!token) throw new Error('Uživatel není přihlášen');
 
             const allergenIds = names.map(n => allergenIdMap[n]).filter(Boolean);
-            const email = getEmailFromToken(token);
 
             const res = await fetch(`${API_BASE_URL}/api/users/allergens`, {
                 method: 'PUT',
@@ -85,7 +84,7 @@ export default function FavScreen() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ email, allergenIds }),
+                body: JSON.stringify({ allergenIds }),
             });
             if (!res.ok) throw new Error();
             setSaveStatus('saved');
@@ -107,18 +106,6 @@ export default function FavScreen() {
         });
     };
 
-    const getEmailFromToken = (token: string): string => {
-        try {
-            const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-            const payload = decodeURIComponent(
-                atob(base64).split('').map(c =>
-                    `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`
-                ).join('')
-            );
-            return JSON.parse(payload).sub;
-        } catch { return ''; }
-    };
-
     const filtered = allAllergens.filter(a =>
         a.name.toLowerCase().includes(search.toLowerCase())
     );
@@ -130,6 +117,14 @@ export default function FavScreen() {
     };
 
     // ── not logged in ───────────────────────────────────────────────────────
+    if (isAuthLoading) {
+        return (
+            <View className="flex-1 items-center justify-center bg-[#F5EFE6]">
+                <ActivityIndicator color="#764534" />
+            </View>
+        );
+    }
+
     if (!isLoggedIn) {
         return (
             <View className="flex-1 items-center justify-center px-8 bg-[#F5EFE6]">
